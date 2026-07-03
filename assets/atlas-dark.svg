@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 380" width="880" height="380"
+     font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif"
+     role="img" aria-label="架构：mcpx add → 探测客户端 → 每客户端适配器（Claude Code JSON / Codex TOML / Cursor JSON）→ 备份+幂等合并 → 握手验证">
+  <defs>
+    <marker id="ah-d" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#5A5A66"/>
+    </marker>
+  </defs>
+  <rect x="0" y="0" width="880" height="380" fill="#1D1D1F"/>
+
+  <!-- connectors -->
+  <g stroke="#3A3A44" stroke-width="1.5" fill="none">
+    <line x1="176" y1="70" x2="234" y2="70" marker-end="url(#ah-d)"/>
+    <path d="M330,100 C330,140 330,140 330,150" marker-end="url(#ah-d)"/>
+    <path d="M330,100 C330,130 560,120 560,150" marker-end="url(#ah-d)"/>
+    <path d="M330,100 C330,130 795,120 795,150" marker-end="url(#ah-d)"/>
+    <line x1="330" y1="222" x2="330" y2="264" marker-end="url(#ah-d)"/>
+    <path d="M560,222 C560,250 340,250 340,264" marker-end="url(#ah-d)"/>
+    <path d="M795,222 C795,250 344,250 344,264" marker-end="url(#ah-d)"/>
+    <line x1="470" y1="298" x2="560" y2="298" marker-end="url(#ah-d)"/>
+  </g>
+
+  <g>
+    <rect x="24" y="46" width="152" height="48" rx="14" fill="#8985FF" fill-opacity="0.16" stroke="#8985FF" stroke-width="1.5"/>
+    <text x="100" y="68" text-anchor="middle" font-size="13" font-weight="700" fill="#BAB7FF">mcpx add &lt;server&gt;</text>
+    <text x="100" y="84" text-anchor="middle" font-size="10.5" fill="#A1A1A8">catalog · --command/--args</text>
+  </g>
+
+  <g>
+    <rect x="234" y="42" width="192" height="56" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="330" y="66" text-anchor="middle" font-size="14" font-weight="600" fill="#9FCBFF">clients.Detect()</text>
+    <text x="330" y="84" text-anchor="middle" font-size="10.5" fill="#A1A1A8">扫描已装客户端的配置路径</text>
+  </g>
+
+  <g>
+    <rect x="242" y="150" width="176" height="72" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="330" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#9FCBFF">Claude Code / Desktop</text>
+    <text x="330" y="196" text-anchor="middle" font-size="11" fill="#A1A1A8">JSON · mcpServers.&lt;name&gt;</text>
+    <text x="330" y="212" text-anchor="middle" font-size="10" fill="#A1A1A8">sjson key-path merge</text>
+  </g>
+  <g>
+    <rect x="472" y="150" width="176" height="72" rx="15" fill="#2DC79A" fill-opacity="0.16" stroke="#2DC79A" stroke-width="1.5"/>
+    <text x="560" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#7FE0C6">Codex</text>
+    <text x="560" y="196" text-anchor="middle" font-size="11" fill="#A1A1A8">TOML · [mcp_servers.&lt;name&gt;]</text>
+    <text x="560" y="212" text-anchor="middle" font-size="10" fill="#A1A1A8">go-toml surgical merge</text>
+  </g>
+  <g>
+    <rect x="707" y="150" width="150" height="72" rx="15" fill="#8985FF" fill-opacity="0.16" stroke="#8985FF" stroke-width="1.5"/>
+    <text x="782" y="176" text-anchor="middle" font-size="13" font-weight="600" fill="#BAB7FF">Cursor</text>
+    <text x="782" y="196" text-anchor="middle" font-size="11" fill="#A1A1A8">JSON · fail-soft</text>
+    <text x="782" y="212" text-anchor="middle" font-size="10" fill="#A1A1A8">skip if absent</text>
+  </g>
+
+  <g>
+    <rect x="230" y="264" width="240" height="68" rx="15" fill="#4DA3FF" fill-opacity="0.16" stroke="#4DA3FF" stroke-width="1.5"/>
+    <text x="350" y="290" text-anchor="middle" font-size="14" font-weight="600" fill="#9FCBFF">config.Merge()</text>
+    <text x="350" y="309" text-anchor="middle" font-size="11" fill="#A1A1A8">backup → 幂等写入 → 保留其它键</text>
+    <text x="350" y="325" text-anchor="middle" font-size="10" fill="#A1A1A8">同一 server 重复 add 字节稳定</text>
+  </g>
+
+  <g>
+    <rect x="560" y="264" width="296" height="68" rx="15" fill="#2DC79A" fill-opacity="0.16" stroke="#2DC79A" stroke-width="1.5"/>
+    <text x="708" y="290" text-anchor="middle" font-size="14" font-weight="600" fill="#7FE0C6">handshake.Test()</text>
+    <text x="708" y="309" text-anchor="middle" font-size="11" fill="#A1A1A8">os/exec stdio JSON-RPC · 无 MCP SDK</text>
+    <text x="708" y="325" text-anchor="middle" font-size="10.5" fill="#7FE0C6" font-weight="600">initialize → tools/list → OK / WARN / FAIL</text>
+  </g>
+
+  <text x="24" y="26" font-size="12" font-weight="600" fill="#A1A1A8">跨客户端配置写入适配层 · 单进程 · 单二进制 · 无常驻服务</text>
+</svg>

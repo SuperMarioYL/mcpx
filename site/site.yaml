@@ -1,5 +1,7 @@
-# Content package manifest — consumed by the site factory (schema_version 1).
-schema_version: 1
+# Content package manifest — consumed by the site factory (schema v2, one-page layout).
+schema_version: 2
+
+layout: one-page
 
 title: mcpx
 
@@ -10,19 +12,6 @@ tagline:
 description:
   zh: 本地、无账号的 MCP 跨客户端安装器——探测客户端、备份配置、幂等写入、握手验证
   en: A local, no-account, cross-client MCP installer — detect clients, back up configs, merge idempotently, verify with a handshake
-
-# Landing buttons, in reading order (order also drives docs nav order).
-buttons:
-  - text: { zh: 快速开始, en: Quickstart }
-    href: /docs/quickstart/
-  - text: { zh: 为什么需要 mcpx, en: Why mcpx }
-    href: /docs/why/
-  - text: { zh: 工作原理, en: How it works }
-    href: /docs/architecture/
-  - text: { zh: 命令参考, en: Command reference }
-    href: /docs/commands/
-  - text: { zh: 常见问题, en: FAQ }
-    href: /docs/faq/
 
 badges:
   - alt: license
@@ -38,3 +27,30 @@ badges:
     img: https://img.shields.io/badge/go-1.24-00ADD8?logo=go&logoColor=white
   - alt: MCP ready
     img: https://img.shields.io/badge/MCP-ready-5E5CE6
+
+# Ordered sections — drives the one-pager.
+sections:
+  - id: demo
+    title: { zh: 效果演示, en: Demo }
+    type: demo
+  - id: problem
+    title: { zh: 它解决什么, en: What It Solves }
+    type: cards
+    icons: [files, terminal-2, shield-check]
+  - id: quickstart
+    title: { zh: 快速开始, en: Quickstart }
+    type: code
+  - id: how
+    title: { zh: 工作原理, en: How It Works }
+    type: figure
+  - id: clients
+    title: { zh: 客户端适配, en: Client Adapters }
+    type: prose
+  - id: faq
+    title: { zh: 常见问题, en: FAQ }
+    type: faq
+
+# Standalone pages under /docs/<id>/.
+pages:
+  - id: commands
+    title: { zh: 命令参考, en: Command Reference }

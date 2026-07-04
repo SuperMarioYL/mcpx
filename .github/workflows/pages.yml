@@ -1,0 +1,19 @@
+name: pages
+on:
+  push:
+    branches: [main]
+    paths: ['README*', 'docs/**', 'assets/**', '.github/workflows/pages.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  site:
+    uses: SuperMarioYL/site-factory/.github/workflows/build-site.yml@v1
+    with:
+      site_host: mcpx.lei6393.com
+      description: "One command installs an MCP server into every coding-agent client you have — local, no account, with a handshake smoke-test."

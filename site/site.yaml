@@ -1,0 +1,40 @@
+# Content package manifest — consumed by the site factory (schema_version 1).
+schema_version: 1
+
+title: mcpx
+
+tagline:
+  zh: 一条命令，把 MCP server 装进你所有的客户端
+  en: One command installs an MCP server into every client you have
+
+description:
+  zh: 本地、无账号的 MCP 跨客户端安装器——探测客户端、备份配置、幂等写入、握手验证
+  en: A local, no-account, cross-client MCP installer — detect clients, back up configs, merge idempotently, verify with a handshake
+
+# Landing buttons, in reading order (order also drives docs nav order).
+buttons:
+  - text: { zh: 快速开始, en: Quickstart }
+    href: /docs/quickstart/
+  - text: { zh: 为什么需要 mcpx, en: Why mcpx }
+    href: /docs/why/
+  - text: { zh: 工作原理, en: How it works }
+    href: /docs/architecture/
+  - text: { zh: 命令参考, en: Command reference }
+    href: /docs/commands/
+  - text: { zh: 常见问题, en: FAQ }
+    href: /docs/faq/
+
+badges:
+  - alt: license
+    img: https://img.shields.io/badge/license-MIT-black
+    href: https://github.com/SuperMarioYL/mcpx/blob/main/LICENSE
+  - alt: latest release
+    img: https://img.shields.io/github/v/release/SuperMarioYL/mcpx
+    href: https://github.com/SuperMarioYL/mcpx/releases
+  - alt: ci
+    img: https://img.shields.io/github/actions/workflow/status/SuperMarioYL/mcpx/ci.yml?branch=main&label=ci
+    href: https://github.com/SuperMarioYL/mcpx/actions/workflows/ci.yml
+  - alt: go 1.24
+    img: https://img.shields.io/badge/go-1.24-00ADD8?logo=go&logoColor=white
+  - alt: MCP ready
+    img: https://img.shields.io/badge/MCP-ready-5E5CE6

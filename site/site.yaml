@@ -1,5 +1,5 @@
-# Content package manifest — consumed by the site factory (schema v2, one-page layout).
-schema_version: 2
+# Content package manifest — consumed by the site factory (schema v3, one-page layout).
+schema_version: 3
 
 layout: one-page
 
@@ -12,6 +12,41 @@ tagline:
 description:
   zh: 本地、无账号的 MCP 跨客户端安装器——探测客户端、备份配置、幂等写入、握手验证
   en: A local, no-account, cross-client MCP installer — detect clients, back up configs, merge idempotently, verify with a handshake
+
+# Animated hero — aurora + typing terminal.
+hero:
+  eyebrow:
+    zh: 本地 · 无账号 · 单二进制
+    en: Local · No account · Single binary
+  headline:
+    zh: "给 agent 加 MCP server\n一条命令装进所有客户端"
+    en: "Add an MCP server to your agents\nOne command installs it everywhere"
+  command: mcpx add filesystem
+  clients:
+    - Claude Code
+    - Claude Desktop
+    - Codex
+    - Cursor
+
+# Rolling stat band under the hero — every number is real.
+stats:
+  - label:
+      zh: 命令
+      en: command
+    count: 1
+  - label:
+      zh: 客户端适配器
+      en: client adapters
+    count: 4
+  - label:
+      zh: 账号 · 云
+      en: account · cloud
+    count: 0
+  - label:
+      zh: 握手上限
+      en: handshake cap
+    count: 8
+    suffix: s
 
 badges:
   - alt: license
@@ -42,7 +77,18 @@ sections:
     type: code
   - id: how
     title: { zh: 工作原理, en: How It Works }
-    type: figure
+    type: diagram
+    entry: mcpx add <server>
+    pipeline:
+      - clients.Detect
+      - backup
+      - config.Merge
+      - handshake.Test
+    targets:
+      - Claude Code
+      - Claude Desktop
+      - Codex
+      - Cursor
   - id: clients
     title: { zh: 客户端适配, en: Client Adapters }
     type: prose

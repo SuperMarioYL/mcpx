@@ -1,4 +1,1 @@
-![mcpx 四步流水线（浅色）](/assets/atlas-light.svg)
-![mcpx 四步流水线（深色）](/assets/atlas-dark.svg)
-
-*一次 `mcpx add` 在单个进程里跑完四步流水线：**探测**（只认磁盘上真实存在的配置文件，绝不猜写）→ **备份**（时间戳兄弟文件，仅在内容确实将要改变时）→ **幂等合并**（只动单个 server 条目，原子写入）→ **握手验证**（stdio 子进程 + 裸 JSON-RPC，8 秒上限）。单二进制、无常驻服务、不依赖 MCP SDK。*
+一次 `mcpx add` 在单个进程里跑完四步流水线：**探测**（`clients.Detect` — 只认磁盘上真实存在的配置文件，绝不猜写）→ **备份**（时间戳兄弟文件，仅在内容确实将要改变时）→ **幂等合并**（`config.Merge` — 只动单个 server 条目，原子写入）→ **握手验证**（`handshake.Test` — stdio 子进程 + 裸 JSON-RPC，8 秒上限）。单二进制、无常驻服务、不依赖 MCP SDK。

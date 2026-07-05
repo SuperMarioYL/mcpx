@@ -1,4 +1,4 @@
-MCP server 的供给侧已经爆炸——光 `awesome-mcp-servers` 一个目录就有 90k+ star。找到一个好用的 server 越来越容易，但装进客户端这一步还停留在手工时代。
+MCP server 的供给侧已经爆炸——光 `awesome-mcp-servers` 一个目录就有 90k+ star。找到一个好用的 server 越来越容易，但把它装进客户端这一步，还停留在手工时代。
 
 ### N 个客户端 × 5-6 步手工活
 

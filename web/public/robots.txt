@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://mcpx.lei6393.com/sitemap.xml

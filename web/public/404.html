@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>404 — mcpx</title>
+    <meta name="robots" content="noindex" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <style>
+      @font-face {
+        font-family: 'Space Grotesk';
+        src: url('/fonts/space-grotesk-latin-var.woff2') format('woff2');
+        font-weight: 300 700;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: 'mcpx CJK';
+        src: url('/fonts/cjk.woff2') format('woff2');
+        font-weight: 100 900;
+        font-display: swap;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        background: #0a0a0f;
+        color: #f0f0f5;
+        font-family: 'Space Grotesk', 'mcpx CJK', system-ui, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        width: 100%;
+        max-width: 640px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 20px;
+        background: #0d0b12;
+        position: relative;
+        overflow: hidden;
+        padding: 72px 32px;
+        text-align: center;
+      }
+      .card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(
+          circle at 50% -70%,
+          transparent 60%,
+          rgba(196, 118, 40, 0.14) 68%,
+          rgba(230, 161, 68, 0.5) 78%,
+          rgba(244, 200, 126, 0.85) 88%,
+          rgba(255, 244, 224, 0.98) 94%,
+          #ffffff 96%
+        );
+        pointer-events: none;
+      }
+      .inner { position: relative; }
+      .code {
+        font-size: clamp(3.4rem, 12vw, 5.4rem);
+        font-weight: 300;
+        letter-spacing: -0.03em;
+        line-height: 1;
+        background: linear-gradient(to right, #ffffff, #d9a866);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 18px;
+      }
+      p { color: #8d8da4; font-size: 0.95rem; margin-bottom: 8px; }
+      p.en { font-size: 0.85rem; color: rgba(255, 255, 255, 0.32); margin-bottom: 36px; }
+      a.btn {
+        display: inline-block;
+        background: #fff;
+        color: #0a0a0f;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.88rem;
+        padding: 12px 32px;
+        border-radius: 999px;
+        transition: opacity 0.2s;
+      }
+      a.btn:hover { opacity: 0.88; }
+      a.btn:focus-visible { outline: 2px solid #e6a144; outline-offset: 3px; }
+      .brand {
+        margin-top: 40px;
+        font-size: 0.8rem;
+        color: rgba(46, 30, 12, 0.72);
+        font-weight: 500;
+        letter-spacing: 0.04em;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <div class="inner">
+        <div class="code">404</div>
+        <p>这个页面不存在 —— 就像没探测到的客户端，mcpx 绝不盲写。</p>
+        <p class="en">This page does not exist. Like an undetected client, mcpx never guess-writes.</p>
+        <a class="btn" href="/">返回首页 · Back home</a>
+        <div class="brand">mcpx — one command, every client</div>
+      </div>
+    </main>
+  </body>
+</html>

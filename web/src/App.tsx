@@ -37,7 +37,11 @@ function initialLang(): Lang {
   } catch {
     /* private mode */
   }
-  return 'zh';
+  // Default by visitor timezone: UTC+8 (Shanghai/Taipei/HK/…) → zh, else en.
+  try {
+    if (new Date().getTimezoneOffset() === -480) return 'zh';
+  } catch { /* timezone unreadable */ }
+  return 'en';
 }
 
 /* ---------- shared icons ---------- */

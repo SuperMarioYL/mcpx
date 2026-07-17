@@ -70,11 +70,11 @@ export const STRINGS: Record<Lang, Strings> = {
       menuClose: '关闭菜单'
     },
     hero: {
-      eyebrow: '本地运行 · 无账号 · 单一二进制',
-      h1a: '给 agent 加 MCP server',
-      h1b: '一条命令，装进所有客户端',
-      sub1: '探测你已装的客户端，写前备份，幂等合并，',
-      sub2: '再逐一 stdio 握手验证。全程单进程，不上云。',
+      eyebrow: '本地运行 · 不上云 · 不注册账号',
+      h1a: '同一个 MCP server，给每个客户端改一遍配置',
+      h1b: '一条命令写进全部，装完当场验证连得上',
+      sub1: 'mcpx 找到你本机已装的所有 coding agent，把要加的 server 写进每一个——',
+      sub2: '写前先备份，只动这一条，装完当场试连，确认每个都真的拿得到工具。',
       installLabel: '安装',
       installCmd: 'go install github.com/SuperMarioYL/mcpx/cmd/mcpx@latest',
       copy: '复制安装命令',
@@ -83,15 +83,15 @@ export const STRINGS: Record<Lang, Strings> = {
       ctaGithub: '在 GitHub 查看',
       nodeServer: 'MCP server',
       nodeMcpx: 'mcpx add',
-      nodeVerify: '握手验证'
+      nodeVerify: '当场验证'
     },
     terminal: {
       title: '~ mcpx add filesystem',
-      caption: '真实输出 —— 探测 → 备份 → 写入 → 握手，每个客户端逐一确认。'
+      caption: '真实输出 —— 写进每一个已装的客户端，并当场确认连得上。'
     },
     clients: {
       caption: '开箱支持的客户端',
-      note: '只写入探测到的客户端 —— 探测不到就明确跳过，绝不盲写。',
+      note: '只动确证已装的客户端 —— 没装的明确跳过，绝不乱写。',
       items: [
         { name: 'Claude Code', detail: '~/.claude.json · JSON' },
         { name: 'Claude Desktop', detail: 'claude_desktop_config.json · JSON' },
@@ -106,34 +106,34 @@ export const STRINGS: Record<Lang, Strings> = {
       cards: [
         {
           title: '一条命令，装进所有客户端',
-          body: '一次 mcpx add，自动探测本机已装的 Claude Code、Claude Desktop、Codex、Cursor，按各家 schema 一次性写好 —— 不用再为每个客户端手改一份不同的 JSON。',
-          chips: ['探测 4 类客户端', 'JSON key-path / TOML 表']
+          body: '一条 mcpx add，自动找到你本机已装的 Claude Code、Claude Desktop、Codex、Cursor，把 server 写进每一个 —— 不用再为每个客户端手改一份不同的配置。',
+          chips: ['一个 server，写进每个客户端', '不用再逐个手改配置']
         },
         {
-          title: '备份先行 · 幂等写入',
-          body: '落盘前先备份原配置，只合并你要装的那一条 server 条目，绝不碰其它键，原子写入。再跑一次是安全的空操作，mcpx remove 也只删它写过的那条。',
-          chips: ['写前自动备份', '只动一条 · 原子写入']
+          title: '写前备份 · 只动这一条',
+          body: '写进任何配置之前，先备份原来的；只加你要装的那一个 server，绝不碰你的其它设置。再跑一次不会重复写入，mcpx remove 也只删它自己加的那条。',
+          chips: ['写前先备份', '只动这一条，不碰其它']
         },
         {
-          title: '逐一握手验证',
-          body: '写完不算完：mcpx 起子进程走 stdio JSON-RPC，跑一遍 initialize + tools/list，8 秒超时内确认每个客户端真的连得上、拿得到工具列表。',
-          chips: ['stdio JSON-RPC', 'initialize + tools/list', '8s 超时']
+          title: '装完当场验证连得上',
+          body: '写完不算完 —— mcpx 会真的把每个 server 启动一次，确认它连得上、你的 agent 拿得到它的工具列表。装完当场就知道哪个客户端真的通了，不用重启后才发现连不上。',
+          chips: ['真的启动一次', '确认拿得到工具列表', '装完当场出结果']
         },
         {
-          title: '本地 · 无账号 · 单一二进制',
-          body: '没有常驻服务、没有云、不需要注册账号，也不引入 MCP SDK 依赖。一个跨平台静态 Go 二进制，装进 PATH 即用。',
-          chips: ['无常驻服务', '跨平台 Go 二进制', '零 SDK 依赖']
+          title: '本地运行 · 不上云 · 不注册',
+          body: '不上云、不注册账号，你的配置也不外发。装上就能用，拔掉即走，不留下常驻进程。',
+          chips: ['不上云 · 不注册', '装上即用，拔掉即走', '配置不外发']
         }
       ]
     },
     cta: {
       h2: '把 5-6 步 × N 个客户端，收敛成一条命令',
-      sub: '开源、MIT、无付费墙 —— 本地写配这一核心动作，永不设墙。',
+      sub: '开源、MIT、无付费墙 —— 本地安装这一核心能力，永远免费。',
       button: '在 GitHub 上开始',
       note: 'MIT 许可 · 开源核心永久免费'
     },
     footer: {
-      tag: '一条命令的跨客户端 MCP 本地安装器',
+      tag: '一条命令，把 MCP server 装进你所有的 coding agent',
       license: 'MIT © 2026 SuperMarioYL',
       githubAria: '在 GitHub 上查看 mcpx'
     }
@@ -151,11 +151,11 @@ export const STRINGS: Record<Lang, Strings> = {
       menuClose: 'Close menu'
     },
     hero: {
-      eyebrow: 'Local · no account · one binary',
-      h1a: 'Give your agent an MCP server',
-      h1b: 'installed everywhere, in one command',
-      sub1: 'Detects the clients you already have, backs up before writing,',
-      sub2: 'merges idempotently, then handshake-verifies each over stdio.',
+      eyebrow: 'Local · no cloud · no account',
+      h1a: 'The same MCP server, hand-configured into every client',
+      h1b: 'one command writes them all — and proves each one connects',
+      sub1: 'mcpx finds every coding agent installed on your machine and writes the server into each one —',
+      sub2: 'backs up first, touches only this one entry, and starts each server to confirm it really connects and exposes its tools.',
       installLabel: 'Install',
       installCmd: 'go install github.com/SuperMarioYL/mcpx/cmd/mcpx@latest',
       copy: 'Copy install command',
@@ -164,15 +164,15 @@ export const STRINGS: Record<Lang, Strings> = {
       ctaGithub: 'View on GitHub',
       nodeServer: 'MCP server',
       nodeMcpx: 'mcpx add',
-      nodeVerify: 'handshake'
+      nodeVerify: 'verified'
     },
     terminal: {
       title: '~ mcpx add filesystem',
-      caption: 'Real output — detect → backup → write → handshake, confirmed per client.'
+      caption: 'Real output — written into every installed client, and confirmed connecting on the spot.'
     },
     clients: {
       caption: 'Supported out of the box',
-      note: 'Writes only to detected clients — undetected ones are skipped loudly, never guess-written.',
+      note: 'Only touches clients it confirms are installed — undetected ones are skipped loudly, never guess-written.',
       items: [
         { name: 'Claude Code', detail: '~/.claude.json · JSON' },
         { name: 'Claude Desktop', detail: 'claude_desktop_config.json · JSON' },
@@ -186,35 +186,35 @@ export const STRINGS: Record<Lang, Strings> = {
       h2b: 'verified to actually connect',
       cards: [
         {
-          title: 'One command, every client',
-          body: 'A single mcpx add auto-detects the Claude Code, Claude Desktop, Codex and Cursor installs on your machine and writes each one in its own schema at once — no more hand-editing a different JSON per client.',
-          chips: ['detects 4 client kinds', 'JSON key-path / TOML table']
+          title: 'One command, into every client',
+          body: 'A single mcpx add finds the Claude Code, Claude Desktop, Codex and Cursor installs on your machine and writes the server into each one — no more hand-editing a different config file per client.',
+          chips: ['one server, into every client', 'no per-client hand-editing']
         },
         {
-          title: 'Backup first, idempotent write',
-          body: 'Backs up the original config before touching disk, merges only the one server entry you asked for, never touches your other keys, and writes atomically. Re-running is a safe no-op; mcpx remove deletes only what it wrote.',
-          chips: ['auto-backup before write', 'one entry · atomic write']
+          title: 'Backs up first, touches only this one',
+          body: 'Before touching any config, it backs up the original; it adds only the one server you asked for and never touches your other settings. Re-running will not write duplicates, and mcpx remove deletes only what it added.',
+          chips: ['backs up first', 'only this one entry']
         },
         {
-          title: 'Handshake-verified, one by one',
-          body: "Writing isn't enough: mcpx spawns the server over stdio JSON-RPC, runs initialize + tools/list, and confirms within an 8-second cap that each client really connects and returns its tool list.",
-          chips: ['stdio JSON-RPC', 'initialize + tools/list', '8s cap']
+          title: 'Verified connecting, right after install',
+          body: 'Writing is not enough — mcpx actually starts each server and confirms it connects and that your agent can see its tools. Right after install you know which clients really work, instead of finding out it is broken after a restart.',
+          chips: ['actually starts it', 'confirms tools are visible', 'answers right after install']
         },
         {
-          title: 'Local, no account, one binary',
-          body: 'No daemon, no cloud, no account to create, and no MCP SDK dependency pulled in. One cross-platform static Go binary: drop it on your PATH and go.',
-          chips: ['no daemon', 'cross-platform Go binary', 'zero SDK deps']
+          title: 'Local · no cloud · no account',
+          body: 'No cloud, no account, and your config never leaves your machine. Install and run; remove it and nothing keeps running in the background.',
+          chips: ['no cloud · no account', 'install and run', 'config stays local']
         }
       ]
     },
     cta: {
       h2: 'Collapse 5-6 steps × N clients into one command',
-      sub: 'Open source, MIT, no paywall — the core act of writing config locally is never gated.',
+      sub: 'Open source, MIT, no paywall — the core local install is free forever.',
       button: 'Get started on GitHub',
       note: 'MIT licensed · the open-source core is free forever'
     },
     footer: {
-      tag: 'The one-command cross-client MCP installer',
+      tag: 'One command, an MCP server into every coding agent you have',
       license: 'MIT © 2026 SuperMarioYL',
       githubAria: 'View mcpx on GitHub'
     }

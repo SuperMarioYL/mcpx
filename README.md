@@ -11,7 +11,7 @@
 <p><sub>mcpx 是一条命令、无账号的 <b>MCP</b> 跨客户端本地安装器：探测客户端 → 写配置 → 握手验证。</sub></p>
 
 <p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" alt="license"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-black" alt="license"></a>
   <img src="https://img.shields.io/github/v/release/SuperMarioYL/mcpx" alt="latest release">
   <a href="https://github.com/SuperMarioYL/mcpx/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/mcpx/ci.yml?branch=main&label=ci" alt="ci"></a>
   <img src="https://img.shields.io/badge/go-1.24-00ADD8?logo=go&logoColor=white" alt="go 1.24">

@@ -144,7 +144,7 @@ mcpx catalog
 
 <h2><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> 许可与贡献</h2>
 
-MIT。欢迎 issue / PR——请附上你用了哪几个客户端、以及希望优先支持哪一个。
+Apache-2.0。欢迎 issue / PR——请附上你用了哪几个客户端、以及希望优先支持哪一个。
 
 ## Share this
 
@@ -152,4 +152,4 @@ MIT。欢迎 issue / PR——请附上你用了哪几个客户端、以及希望
 mcpx — the one-command MCP installer that writes into every coding agent you have (Claude Code, Codex, Cursor) and handshake-verifies each. No account, no cloud. https://github.com/SuperMarioYL/mcpx
 ```
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>

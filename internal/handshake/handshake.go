@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"strings"
 	"time"
@@ -251,13 +252,35 @@ func readResponse(ctx context.Context, frames <-chan frame, wantID int) (jsonrpc
 	}
 }
 
+// envSlice builds the child process environment by layering the user-supplied
+// vars over the parent environment (os.Environ). Go's os/exec replaces (rather
+// than extends) the parent env when cmd.Env is non-nil, so without this the
+// spawned server would receive ONLY the --env vars — losing PATH/HOME, which
+// means npx/uvx catalog servers can't locate node/python and exit immediately,
+// readLoop then sees EOF and the handshake reports a false FAIL even though the
+// config write succeeded. When env is empty we return nil so cmd.Env stays nil
+// and the parent env is inherited untouched (catalog-only adds are unaffected).
 func envSlice(env map[string]string) []string {
 	if len(env) == 0 {
 		return nil
 	}
-	out := make([]string, 0, len(env))
+	parent := os.Environ()
+	out := make([]string, 0, len(parent)+len(env))
+	applied := make(map[string]struct{}, len(env))
+	for _, kv := range parent {
+		if key, _, found := strings.Cut(kv, "="); found {
+			if override, hasUser := env[key]; hasUser {
+				out = append(out, key+"="+override)
+				applied[key] = struct{}{}
+				continue
+			}
+		}
+		out = append(out, kv)
+	}
 	for k, v := range env {
-		out = append(out, k+"="+v)
+		if _, ok := applied[k]; !ok {
+			out = append(out, k+"="+v)
+		}
 	}
 	return out
 }

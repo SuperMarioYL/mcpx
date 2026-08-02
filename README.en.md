@@ -11,7 +11,7 @@
 <p><sub>mcpx is a one-command, no-account, local <b>MCP</b> cross-client installer: detect clients → write config → handshake-verify.</sub></p>
 
 <p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-MIT-black" alt="license"></a>
+  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-black" alt="license"></a>
   <img src="https://img.shields.io/github/v/release/SuperMarioYL/mcpx" alt="latest release">
   <a href="https://github.com/SuperMarioYL/mcpx/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/mcpx/ci.yml?branch=main&label=ci" alt="ci"></a>
   <img src="https://img.shields.io/badge/go-1.24-00ADD8?logo=go&logoColor=white" alt="go 1.24">
@@ -144,7 +144,7 @@ The local core — detect, backup, cross-client write, handshake — is **open s
 
 <h2><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License & contributing</h2>
 
-MIT. Issues and PRs welcome — please mention which clients you use and which one you'd like supported next.
+Apache-2.0. Issues and PRs welcome — please mention which clients you use and which one you'd like supported next.
 
 ## Share this
 
@@ -152,4 +152,4 @@ MIT. Issues and PRs welcome — please mention which clients you use and which o
 mcpx — the one-command MCP installer that writes into every coding agent you have (Claude Code, Codex, Cursor) and handshake-verifies each. No account, no cloud. https://github.com/SuperMarioYL/mcpx
 ```
 
-<p align="center"><sub><a href="./LICENSE">MIT</a> © 2026 SuperMarioYL</sub></p>
+<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>

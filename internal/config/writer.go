@@ -45,8 +45,20 @@ type Result struct {
 // timestamp used for backup suffixes; overridable in tests.
 var nowFunc = time.Now
 
+// backupName returns a sibling backup path for path that does not yet exist.
+// The timestamp carries millisecond resolution so two ops in the same
+// wall-clock second don't collide; if a collision still occurs (same
+// millisecond), a -1, -2, ... suffix is appended until an unused name is found,
+// so scripted back-to-back ops never clobber the prior backup.
 func backupName(path string) string {
-	return fmt.Sprintf("%s.mcpx.bak.%s", path, nowFunc().Format("20060102-150405"))
+	base := fmt.Sprintf("%s.mcpx.bak.%s", path, nowFunc().Format("20060102-150405.000"))
+	bp := base
+	for i := 1; ; i++ {
+		if _, err := os.Stat(bp); err != nil {
+			return bp
+		}
+		bp = fmt.Sprintf("%s-%d", base, i)
+	}
 }
 
 // backup copies path to a timestamped sibling and returns the backup path. It
@@ -60,7 +72,7 @@ func backup(path string) (string, error) {
 		return "", fmt.Errorf("read for backup: %w", err)
 	}
 	bp := backupName(path)
-	if err := os.WriteFile(bp, data, 0o644); err != nil {
+	if err := os.WriteFile(bp, data, resolvePerm(path)); err != nil {
 		return "", fmt.Errorf("write backup: %w", err)
 	}
 	return bp, nil
@@ -166,7 +178,7 @@ func mergeJSON(c clients.Client, path string, spec clients.ServerSpec, dryRun bo
 		return Result{}, err
 	}
 	res.BackupPath = bp
-	if err := writeFileAtomic(path, updated, 0o644); err != nil {
+	if err := writeFileAtomic(path, updated, resolvePerm(path)); err != nil {
 		return Result{}, err
 	}
 	return res, nil
@@ -197,7 +209,7 @@ func removeJSON(path, name string, dryRun bool) (Result, error) {
 		return Result{}, err
 	}
 	res.BackupPath = bp
-	if err := writeFileAtomic(path, updated, 0o644); err != nil {
+	if err := writeFileAtomic(path, updated, resolvePerm(path)); err != nil {
 		return Result{}, err
 	}
 	return res, nil
@@ -378,7 +390,7 @@ func mergeTOML(c clients.Client, path string, spec clients.ServerSpec, dryRun bo
 		return Result{}, err
 	}
 	res.BackupPath = bp
-	if err := writeFileAtomic(path, out, 0o644); err != nil {
+	if err := writeFileAtomic(path, out, resolvePerm(path)); err != nil {
 		return Result{}, err
 	}
 	return res, nil
@@ -418,7 +430,7 @@ func removeTOML(path, name string, dryRun bool) (Result, error) {
 		return Result{}, err
 	}
 	res.BackupPath = bp
-	if err := writeFileAtomic(path, out, 0o644); err != nil {
+	if err := writeFileAtomic(path, out, resolvePerm(path)); err != nil {
 		return Result{}, err
 	}
 	return res, nil
@@ -481,6 +493,18 @@ func stringMap(m map[string]string) map[string]any {
 		out[k] = v
 	}
 	return out
+}
+
+// resolvePerm returns the permission bits of the existing file at path, or
+// 0o600 when the file is new or stat fails. Existing config files keep their
+// current mode so a hardened 0600 ~/.claude.json (which holds MCP env secrets)
+// is never silently widened to 0644 by an add/remove; newly-created configs
+// default to 0600 rather than the world-readable 0644.
+func resolvePerm(path string) os.FileMode {
+	if fi, err := os.Stat(path); err == nil {
+		return fi.Mode().Perm()
+	}
+	return 0o600
 }
 
 // writeFileAtomic writes data to a temp file in the same dir then renames it

@@ -150,7 +150,7 @@ func run(ctx context.Context, stdin io.Writer, frames <-chan frame) (Result, err
 	initParams := map[string]any{
 		"protocolVersion": "2025-06-18",
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "mcpx", "version": "0.1.0"},
+		"clientInfo":      map[string]any{"name": "mcpx", "version": "0.3.0"},
 	}
 	if err := writeRequest(stdin, jsonrpcRequest{JSONRPC: "2.0", ID: 1, Method: "initialize", Params: initParams}); err != nil {
 		return Result{}, fmt.Errorf("send initialize: %w", err)

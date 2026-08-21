@@ -128,13 +128,13 @@ export const STRINGS: Record<Lang, Strings> = {
     },
     cta: {
       h2: '把 5-6 步 × N 个客户端，收敛成一条命令',
-      sub: '开源、MIT、无付费墙 —— 本地安装这一核心能力，永远免费。',
+      sub: '开源、Apache-2.0、无付费墙 —— 本地安装这一核心能力，永远免费。',
       button: '在 GitHub 上开始',
-      note: 'MIT 许可 · 开源核心永久免费'
+      note: 'Apache-2.0 许可 · 开源核心永久免费'
     },
     footer: {
       tag: '一条命令，把 MCP server 装进你所有的 coding agent',
-      license: 'MIT © 2026 SuperMarioYL',
+      license: 'Apache-2.0 © 2026 SuperMarioYL',
       githubAria: '在 GitHub 上查看 mcpx'
     }
   },
@@ -209,13 +209,13 @@ export const STRINGS: Record<Lang, Strings> = {
     },
     cta: {
       h2: 'Collapse 5-6 steps × N clients into one command',
-      sub: 'Open source, MIT, no paywall — the core local install is free forever.',
+      sub: 'Open source, Apache-2.0, no paywall — the core local install is free forever.',
       button: 'Get started on GitHub',
-      note: 'MIT licensed · the open-source core is free forever'
+      note: 'Apache-2.0 licensed · the open-source core is free forever'
     },
     footer: {
       tag: 'One command, an MCP server into every coding agent you have',
-      license: 'MIT © 2026 SuperMarioYL',
+      license: 'Apache-2.0 © 2026 SuperMarioYL',
       githubAria: 'View mcpx on GitHub'
     }
   }

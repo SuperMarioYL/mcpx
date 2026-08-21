@@ -20,7 +20,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags; defaults to the VERSION file value.
-var version = "0.1.0"
+var version = "0.3.0"
 
 // global flags
 var (
@@ -327,22 +327,14 @@ func dryRunTag() string {
 }
 
 // splitArgs splits a space-separated args string, honoring simple quoting so
-// an argument containing spaces can be given as "a \"b c\" d".
+// an argument containing spaces can be given as 'a "b c" d'. A comma is an
+// ordinary character: a single token that contains a comma but no whitespace
+// (e.g. a URL query http://x/api?a=1,b=2) stays one arg instead of being
+// mis-split at the comma. Quote the token if it also needs to contain spaces.
 func splitArgs(s string) []string {
 	s = strings.TrimSpace(s)
 	if s == "" {
 		return nil
-	}
-	// Support comma-separated too (matches the plan's --args '-y,pkg,.' form).
-	if strings.Contains(s, ",") && !strings.Contains(s, " ") {
-		parts := strings.Split(s, ",")
-		out := make([]string, 0, len(parts))
-		for _, p := range parts {
-			if p = strings.TrimSpace(p); p != "" {
-				out = append(out, p)
-			}
-		}
-		return out
 	}
 	return fields(s)
 }

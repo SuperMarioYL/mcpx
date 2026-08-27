@@ -3,5 +3,18 @@
   "name": "mcpx",
   "github": "https://github.com/SuperMarioYL/mcpx",
   "host": "mcpx.lei6393.com",
-  "meta": { "template": "cybersecurity-hero" }
+  "meta": {
+    "template": "cybersecurity-hero",
+    "source_version": "v0.4.0",
+    "content_version": "v0.4.0",
+    "generated_at": "2026-08-27T18:25:57Z",
+    "web_factory_ref": "v1"
+  },
+  "changelog": [
+    {
+      "version": "v0.4.0",
+      "zh": "握手冒烟测试现在在独立进程组里启动 server，结束时装组杀掉整个进程树——npx/uvx 拉起的 node/python 子进程不再被孤立成孤儿占用资源。README「实测输出」里的备份文件名已对齐真实格式（.mcpx.bak.<YYYYMMDD-HHMMSS.毫秒>）。",
+      "en": "The handshake smoke test now launches the server in its own process group and tears down the whole tree on exit — the node/python grandchild that npx/uvx spawns is no longer orphaned to leak a runtime process on every handshake. The README \"real output\" backup filename now matches the real format (.mcpx.bak.<YYYYMMDD-HHMMSS.mmm>)."
+    }
+  ]
 }

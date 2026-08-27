@@ -98,6 +98,10 @@ func TestContext(parent context.Context, spec clients.ServerSpec, timeout time.D
 
 	cmd := exec.CommandContext(ctx, spec.Command, spec.Args...)
 	cmd.Env = envSlice(spec.Env)
+	// Run the server in its own process group so the whole runtime tree
+	// (npx/uvx wrapper + the node/python grandchild it spawns) can be torn
+	// down together — killing only the direct child orphans the grandchild.
+	configureProc(cmd)
 
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -112,11 +116,13 @@ func TestContext(parent context.Context, spec clients.ServerSpec, timeout time.D
 	if err := cmd.Start(); err != nil {
 		return Result{Status: StatusFail, Reason: "spawn failed: " + err.Error(), Elapsed: time.Since(start)}
 	}
-	// Ensure the process is reaped and killed on any exit path.
+	// Ensure the process tree is reaped and killed on any exit path. We kill
+	// the whole process group (configureProc put the server in its own group)
+	// so the npx/uvx grandchild runtime is not orphaned when the wrapper dies.
 	defer func() {
 		_ = stdin.Close()
 		if cmd.Process != nil {
-			_ = cmd.Process.Kill()
+			terminateProc(cmd)
 		}
 		_ = cmd.Wait()
 	}()
@@ -150,7 +156,7 @@ func run(ctx context.Context, stdin io.Writer, frames <-chan frame) (Result, err
 	initParams := map[string]any{
 		"protocolVersion": "2025-06-18",
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "mcpx", "version": "0.3.0"},
+		"clientInfo":      map[string]any{"name": "mcpx", "version": "0.4.0"},
 	}
 	if err := writeRequest(stdin, jsonrpcRequest{JSONRPC: "2.0", ID: 1, Method: "initialize", Params: initParams}); err != nil {
 		return Result{}, fmt.Errorf("send initialize: %w", err)

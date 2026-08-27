@@ -54,7 +54,7 @@ Detected 3 client(s): Claude Code, Claude Desktop, Codex
 
 Installing filesystem (npx -y @modelcontextprotocol/server-filesystem .) into 3 client(s)
   Claude Code      backup → write → merged
-                   backup: ~/.claude.json.mcpx-bak-20260704-1126
+                   backup: ~/.claude.json.mcpx.bak.20260704-112615.123
                    ✓ handshake OK (initialize + tools/list, 12 tools)
   Claude Desktop   backup → write → merged
                    ✓ handshake OK (initialize + tools/list, 12 tools)

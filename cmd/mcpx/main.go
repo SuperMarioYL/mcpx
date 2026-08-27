@@ -20,7 +20,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags; defaults to the VERSION file value.
-var version = "0.3.0"
+var version = "0.4.0"
 
 // global flags
 var (

@@ -5,12 +5,17 @@
   "host": "mcpx.lei6393.com",
   "meta": {
     "template": "cybersecurity-hero",
-    "source_version": "v0.4.0",
-    "content_version": "v0.4.0",
-    "generated_at": "2026-08-27T18:25:57Z",
+    "source_version": "v0.5.0",
+    "content_version": "v0.5.0",
+    "generated_at": "2026-09-07T04:24:37Z",
     "web_factory_ref": "v1"
   },
   "changelog": [
+    {
+      "version": "v0.5.0",
+      "zh": "把所有版本面对齐：回填了 0.2.0/0.3.0/0.4.0 三个小版本的 CHANGELOG 条目（此前头部仍是 0.1.0，而二进制已是 0.4.0），给 site.json 补上 content_version，并加了一个单一真源锁步测试，断言 VERSION、--version、CHANGELOG 头部、站点 content_version 四处一致。",
+      "en": "Put every version surface back in lockstep: backfilled the missing 0.2.0/0.3.0/0.4.0 CHANGELOG entries (the head still read 0.1.0 while the binary reported 0.4.0), added a content_version to site.json, and added a single-source-of-truth lockstep test asserting VERSION, --version, the CHANGELOG head, and the site content_version all agree."
+    },
     {
       "version": "v0.4.0",
       "zh": "握手冒烟测试现在在独立进程组里启动 server，结束时装组杀掉整个进程树——npx/uvx 拉起的 node/python 子进程不再被孤立成孤儿占用资源。README「实测输出」里的备份文件名已对齐真实格式（.mcpx.bak.<YYYYMMDD-HHMMSS.毫秒>）。",

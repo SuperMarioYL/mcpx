@@ -3,23 +3,213 @@
   "name": "mcpx",
   "github": "https://github.com/SuperMarioYL/mcpx",
   "host": "mcpx.lei6393.com",
-  "meta": {
-    "template": "cybersecurity-hero",
-    "source_version": "v0.5.0",
-    "content_version": "v0.5.0",
-    "generated_at": "2026-09-07T04:24:37Z",
-    "web_factory_ref": "v1"
+  "palette": "auto",
+  "lang": {
+    "primary": "en",
+    "toggle": true
   },
-  "changelog": [
+  "meta": {
+    "visual_style": "neon-particle",
+    "demo_source": "docs/demo-results.json"
+  },
+  "hero": {
+    "headline": {
+      "en": "Write one MCP server entry across your clients.",
+      "zh": "把同一 MCP 服务配置写入多个客户端。"
+    },
+    "sub": {
+      "en": "mcpx detects supported client configuration files, merges one stdio server definition into each selected client, and can launch the server for an initialize/tools-list smoke test.",
+      "zh": "mcpx 检测支持的客户端配置文件，向选定客户端合并同一个 stdio 服务定义，并可启动服务执行 initialize/tools-list 冒烟检查。"
+    },
+    "href": "#quickstart"
+  },
+  "advantages": [
     {
-      "version": "v0.5.0",
-      "zh": "把所有版本面对齐：回填了 0.2.0/0.3.0/0.4.0 三个小版本的 CHANGELOG 条目（此前头部仍是 0.1.0，而二进制已是 0.4.0），给 site.json 补上 content_version，并加了一个单一真源锁步测试，断言 VERSION、--version、CHANGELOG 头部、站点 content_version 四处一致。",
-      "en": "Put every version surface back in lockstep: backfilled the missing 0.2.0/0.3.0/0.4.0 CHANGELOG entries (the head still read 0.1.0 while the binary reported 0.4.0), added a content_version to site.json, and added a single-source-of-truth lockstep test asserting VERSION, --version, the CHANGELOG head, and the site content_version all agree."
+      "title": {
+        "en": "One input definition",
+        "zh": "统一输入定义"
+      },
+      "body": {
+        "en": "Command, args and env feed each adapter.",
+        "zh": "command、args 与 env 交给各适配器。"
+      }
     },
     {
-      "version": "v0.4.0",
-      "zh": "握手冒烟测试现在在独立进程组里启动 server，结束时装组杀掉整个进程树——npx/uvx 拉起的 node/python 子进程不再被孤立成孤儿占用资源。README「实测输出」里的备份文件名已对齐真实格式（.mcpx.bak.<YYYYMMDD-HHMMSS.毫秒>）。",
-      "en": "The handshake smoke test now launches the server in its own process group and tears down the whole tree on exit — the node/python grandchild that npx/uvx spawns is no longer orphaned to leak a runtime process on every handshake. The README \"real output\" backup filename now matches the real format (.mcpx.bak.<YYYYMMDD-HHMMSS.mmm>)."
+      "title": {
+        "en": "Repeatable updates",
+        "zh": "可重复更新"
+      },
+      "body": {
+        "en": "Equivalent server entries produce no write.",
+        "zh": "等价服务配置不会重复写入。"
+      }
+    },
+    {
+      "title": {
+        "en": "Backups before change",
+        "zh": "变更前备份"
+      },
+      "body": {
+        "en": "Changed existing configs receive sibling backups.",
+        "zh": "修改已有配置前生成同目录备份。"
+      }
     }
-  ]
+  ],
+  "demo": {
+    "title": {
+      "en": "Run it on a complete example",
+      "zh": "运行完整示例"
+    },
+    "note": {
+      "en": "The Go example writes JSON and TOML fixtures, repeats each merge, reads the entries and removes them from its own temporary files.",
+      "zh": "Go 示例写入 JSON 与 TOML fixture，重复合并、读取条目，并仅从自身临时文件移除。"
+    },
+    "source": "https://github.com/SuperMarioYL/mcpx/blob/main/docs/demo-results.json",
+    "steps": [
+      {
+        "label": "Recorded run",
+        "body": "Local JSON/TOML merge, repeat and removal using production writers with temporary config paths; no installed client or MCP server is contacted.",
+        "command": "go run ./examples/presentation",
+        "output": "claude-code: first_changed=true backup=true repeat_changed=false servers=1\nclaude-code: remove_changed=true\ncodex: first_changed=true backup=true repeat_changed=false servers=1\ncodex: remove_changed=true",
+        "image": "/assets/presentation/demo-0-light.svg",
+        "imageDark": "/assets/presentation/demo-0-dark.svg"
+      }
+    ]
+  },
+  "quickstart": {
+    "title": {
+      "en": "Try it locally",
+      "zh": "本地上手"
+    },
+    "body": {
+      "en": "The Go example writes JSON and TOML fixtures, repeats each merge, reads the entries and removes them from its own temporary files.",
+      "zh": "Go 示例写入 JSON 与 TOML fixture，重复合并、读取条目，并仅从自身临时文件移除。"
+    },
+    "steps": [
+      {
+        "title": {
+          "en": "Install from source",
+          "zh": "从源码安装"
+        },
+        "code": "git clone https://github.com/SuperMarioYL/mcpx.git\ncd mcpx\ngo build ./cmd/mcpx"
+      },
+      {
+        "title": {
+          "en": "Run the included example",
+          "zh": "运行随仓示例"
+        },
+        "code": "go run ./examples/presentation"
+      }
+    ]
+  },
+  "limitations": [
+    {
+      "en": "The demo exercises config files in a temporary directory, not live clients or an MCP handshake.",
+      "zh": "示例操作临时目录配置，不验证在线客户端或 MCP 握手。"
+    },
+    {
+      "en": "A server handshake does not prove a client loaded the entry or every tool works. Warnings and failures can leave the entry installed; inspect per-client output rather than trusting exit status alone.",
+      "zh": "服务握手不证明客户端已加载配置或所有工具可用。警告与失败可能保留已写条目；应检查逐客户端输出，不能只依赖退出码。"
+    },
+    {
+      "en": "remove targets the named entry and does not track whether mcpx originally created it. Server commands can download packages or run code during a real add.",
+      "zh": "remove 按名称删除条目，不追踪是否最初由 mcpx 创建。真实 add 启动的服务命令可能下载包或执行代码。"
+    }
+  ],
+  "scene": {
+    "kind": "neon-graph",
+    "fallback": "/assets/presentation/scene-dark.svg",
+    "fallbackLight": "/assets/presentation/scene-light.svg"
+  },
+  "story": {
+    "intro": {
+      "title": {
+        "en": "A concrete task",
+        "zh": "从实际任务出发"
+      },
+      "body": {
+        "en": "Maintaining the same command, arguments and environment in several config schemas invites drift. A single ServerSpec gives those entries a common input while adapters own each file format.",
+        "zh": "在多种配置格式重复维护命令、参数与环境变量容易产生差异。同一 ServerSpec 为这些配置提供共同输入，适配器负责各文件格式。"
+      }
+    },
+    "sections": [
+      {
+        "title": {
+          "en": "Follow the operation",
+          "zh": "处理过程"
+        },
+        "body": {
+          "en": "Client adapters resolve paths and schemas. The config writer backs up changed files, merges only the named entry, and treats repeated equivalent input as a no-op. add then launches the specified stdio command for a protocol smoke test; it does not start the client application itself.",
+          "zh": "客户端适配器解析路径与结构；配置 writer 在变更前备份、合并指定条目，并将等价重复输入视为无操作。随后 add 启动指定 stdio 命令执行协议冒烟检查，不启动客户端应用本身。"
+        },
+        "image": {
+          "light": "/assets/presentation/process-light.svg",
+          "dark": "/assets/presentation/process-dark.svg",
+          "alt": {
+            "en": "Follow the operation",
+            "zh": "处理过程"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "Inside mcpx",
+          "zh": "mcpx 的内部流程"
+        },
+        "body": {
+          "en": "Client adapters resolve paths and schemas. The config writer backs up changed files, merges only the named entry, and treats repeated equivalent input as a no-op. add then launches the specified stdio command for a protocol smoke test; it does not start the client application itself.",
+          "zh": "客户端适配器解析路径与结构；配置 writer 在变更前备份、合并指定条目，并将等价重复输入视为无操作。随后 add 启动指定 stdio 命令执行协议冒烟检查，不启动客户端应用本身。"
+        },
+        "image": {
+          "light": "/assets/presentation/architecture-light.svg",
+          "dark": "/assets/presentation/architecture-dark.svg",
+          "alt": {
+            "en": "Inside mcpx",
+            "zh": "mcpx 的内部流程"
+          }
+        }
+      },
+      {
+        "title": {
+          "en": "Connect the pieces",
+          "zh": "输入与输出"
+        },
+        "body": {
+          "en": "Choose the input and output route that matches your workflow. The local example below exercises the stated subset.",
+          "zh": "根据工作流选择输入与输出路径。本文本地示例验证其中明确说明的子流程。"
+        },
+        "image": {
+          "light": "/assets/presentation/integrations-light.svg",
+          "dark": "/assets/presentation/integrations-dark.svg",
+          "alt": {
+            "en": "Connect the pieces",
+            "zh": "输入与输出"
+          }
+        }
+      }
+    ],
+    "details": [
+      {
+        "title": {
+          "en": "Configuration",
+          "zh": "配置"
+        },
+        "body": {
+          "en": "--clients accepts claude-code, claude-desktop, codex and cursor; absent configs are skipped. --dry-run previews without writes or handshake; --yes skips the write prompt. Custom servers use --command, a quoted --args string and repeated --env K=V. Environment entries are stored in client config; prefer the client/server credential mechanism suitable for your setup. Reload affected clients after a real change.",
+          "zh": "--clients 支持 claude-code、claude-desktop、codex 和 cursor；不存在的配置会跳过。--dry-run 不写文件、不握手；--yes 跳过写入询问。自定义服务使用 --command、带引号的 --args 与重复 --env K=V。环境条目会保存到客户端配置，应按部署选择合适的凭据机制。真实修改后重新加载客户端。"
+        }
+      },
+      {
+        "title": {
+          "en": "Further use",
+          "zh": "进一步使用"
+        },
+        "body": {
+          "en": "Run these commands from the repository root after installation. Replace paths for your own data.",
+          "zh": "安装后在仓库根目录运行以下命令；处理自己的数据时替换相应路径。"
+        },
+        "code": "go run ./cmd/mcpx catalog\ngo run ./cmd/mcpx add filesystem --clients claude-code,codex --dry-run\n# Apply to your detected clients after reviewing the preview:\ngo run ./cmd/mcpx add filesystem --clients claude-code,codex\ngo run ./cmd/mcpx list\ngo run ./cmd/mcpx remove filesystem --dry-run"
+      }
+    ]
+  }
 }

@@ -1,155 +1,128 @@
-<div align="right"><sub><b>English</b>&nbsp;&nbsp;⇄&nbsp;&nbsp;<a href="./README.md">简体中文</a></sub></div>
+[简体中文](./README.md) · [Website](https://mcpx.lei6393.com) · [GitHub](https://github.com/SuperMarioYL/mcpx)
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/hero-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/hero-light.svg">
-    <img src="./assets/hero-light.svg" width="880" alt="mcpx — one command installs an MCP server into every client you have">
-  </picture>
-</p>
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/hero-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/hero-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/hero-dark.svg">
+  <img src="./assets/presentation/hero-light.svg" width="960" alt="Hero diagram">
+</picture>
 
-<p><sub>mcpx is a one-command, no-account, local <b>MCP</b> cross-client installer: detect clients → write config → handshake-verify.</sub></p>
+# mcpx
 
-<p align="center">
-  <a href="./LICENSE"><img src="https://img.shields.io/badge/license-Apache--2.0-black" alt="license"></a>
-  <img src="https://img.shields.io/github/v/release/SuperMarioYL/mcpx" alt="latest release">
-  <a href="https://github.com/SuperMarioYL/mcpx/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/SuperMarioYL/mcpx/ci.yml?branch=main&label=ci" alt="ci"></a>
-  <img src="https://img.shields.io/badge/go-1.24-00ADD8?logo=go&logoColor=white" alt="go 1.24">
-  <img src="https://img.shields.io/badge/MCP-ready-5E5CE6" alt="MCP ready">
-  <img src="https://img.shields.io/badge/coding%20agent-native-0071E3" alt="coding agent native">
-</p>
+**Write one MCP server entry across your clients.**
 
-**Adding an MCP server to your agent still means hand-editing a different JSON per client — `mcpx add <server>` collapses that into one command that writes into every client you have and handshake-verifies each.**
+mcpx detects supported client configuration files, merges one stdio server definition into each selected client, and can launch the server for an initialize/tools-list smoke test.
 
-<h2><img src="https://api.iconify.design/tabler:topology-star-3.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Architecture</h2>
+## Why use it
 
-One `mcpx add`: detect the coding-agent clients installed on this machine (Claude Code / Claude Desktop / Codex / Cursor), **back up → idempotently merge** into each one in its own schema (JSON key-path or a TOML table), then spawn the server over stdio JSON-RPC and run a handshake. Single process, single binary, no daemon, no MCP SDK.
+Maintaining the same command, arguments and environment in several config schemas invites drift. A single ServerSpec gives those entries a common input while adapters own each file format.
 
-<p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="./assets/atlas-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="./assets/atlas-light.svg">
-    <img src="./assets/atlas-light.svg" width="880" alt="Architecture: mcpx add → detect clients → per-client adapter (Claude Code JSON / Codex TOML / Cursor JSON) → backup + idempotent merge → handshake">
-  </picture>
-</p>
+- **One input definition** — Command, args and env feed each adapter.
+- **Repeatable updates** — Equivalent server entries produce no write.
+- **Backups before change** — Changed existing configs receive sibling backups.
 
-<h2><img src="https://api.iconify.design/tabler:info-circle.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Why this exists</h2>
+## Architecture
 
-The supply side of MCP servers is already huge (`awesome-mcp-servers` 90k★, `chrome-devtools-mcp` 45k★), but wiring one into a client is still manual: every client keeps its config at a **different path with a different schema**. You write it once for each Coding Agent — Claude Code, Cursor, Codex — restart each, and hope the handshake works. `claude mcp add` only solves Claude Code itself; the value concentrates on people who run **more than one client**. mcpx collapses `5-6 steps × N clients` into one local command — backup first, touch only the entry it wrote, verify on the spot.
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/architecture-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/architecture-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/architecture-dark.svg">
+  <img src="./assets/presentation/architecture-light.svg" width="960" alt="Architecture diagram">
+</picture>
 
-<h2><img src="https://api.iconify.design/tabler:rocket.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Quickstart</h2>
+Client adapters resolve paths and schemas. The config writer backs up changed files, merges only the named entry, and treats repeated equivalent input as a no-op. add then launches the specified stdio command for a protocol smoke test; it does not start the client application itself.
+
+| Component | Responsibility |
+| --- | --- |
+| `ServerSpec / catalog` | internal/catalog |
+| `Client adapters` | internal/clients |
+| `Backup + merge` | internal/config |
+| `Stdio handshake` | internal/handshake |
+
+## Install and quickstart
+
+Use the runtime version declared in the repository manifest. The source installation below makes the included example reproducible.
 
 ```bash
-go install github.com/SuperMarioYL/mcpx/cmd/mcpx@latest   # single binary onto PATH (< 30s)
-mcpx add filesystem                                        # detect → backup → write → handshake
-mcpx list                                                  # confirm every client got it
+git clone https://github.com/SuperMarioYL/mcpx.git
+cd mcpx
+go build ./cmd/mcpx
 ```
 
-<details>
-<summary>Real output (dev machine with 3 clients)</summary>
+The Go example writes JSON and TOML fixtures, repeats each merge, reads the entries and removes them from its own temporary files.
+
+```bash
+go run ./examples/presentation
+```
+
+## Recorded demo
+
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/process-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/process-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/process-dark.svg">
+  <img src="./assets/presentation/process-light.svg" width="960" alt="Process diagram">
+</picture>
+
+Both adapters write one entry with a backup; the second merge is unchanged, and removal reports a change.
 
 ```text
-Detected 3 client(s): Claude Code, Claude Desktop, Codex
-  · Cursor not detected (no config at ~/.cursor/mcp.json)
-
-Installing filesystem (npx -y @modelcontextprotocol/server-filesystem .) into 3 client(s)
-  Claude Code      backup → write → merged
-                   backup: ~/.claude.json.mcpx.bak.20260704-112615.123
-                   ✓ handshake OK (initialize + tools/list, 12 tools)
-  Claude Desktop   backup → write → merged
-                   ✓ handshake OK (initialize + tools/list, 12 tools)
-  Codex            backup → write → merged
-                   ✓ handshake OK (initialize + tools/list, 12 tools)
-
-✓ 3/3 clients ready
-Restart (or reload) the affected clients to pick up the new server.
+claude-code: first_changed=true backup=true repeat_changed=false servers=1
+claude-code: remove_changed=true
+codex: first_changed=true backup=true repeat_changed=false servers=1
+codex: remove_changed=true
 ```
-</details>
 
-<h2><img src="https://api.iconify.design/tabler:terminal-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Usage</h2>
+The complete command and output are recorded in [docs/demo-results.json](./docs/demo-results.json). Inputs and reproduction code are included in the repository.
+
+![Existing terminal recording](./assets/demo.gif)
+
+The existing recording is retained for context; the text example above documents the reproducible scenario.
+
+## Usage
+
+Run these commands from the repository root after installation. Replace paths for your own data.
 
 ```bash
-# Install a built-in server by name (backup → idempotent write → handshake)
-mcpx add filesystem
-
-# Not in the catalog? Pass an explicit command / args / env
-mcpx add my-server --command npx --args '-y @my-scope/my-mcp-server' --env API_TOKEN=secret
-
-# Restrict to specific clients, skip the prompt
-mcpx add git --clients claude-code,codex --yes
-
-# Preview without touching any file
-mcpx add fetch --dry-run
-
-# Undo — removes only the entry mcpx wrote, backup preserved
-mcpx remove filesystem
-
-# List the built-in catalog
-mcpx catalog
+go run ./cmd/mcpx catalog
+go run ./cmd/mcpx add filesystem --clients claude-code,codex --dry-run
+# Apply to your detected clients after reviewing the preview:
+go run ./cmd/mcpx add filesystem --clients claude-code,codex
+go run ./cmd/mcpx list
+go run ./cmd/mcpx remove filesystem --dry-run
 ```
 
-More in [`examples/quickstart.sh`](./examples/quickstart.sh).
+## Configuration
 
-**Subcommands**: `add <server>` · `list` · `remove <server>` (alias `rm`) · `catalog`
-**Global flags**: `--clients c1,c2` · `--dry-run` · `--yes/-y` · `--version/-v` · `--help/-h`
+--clients accepts claude-code, claude-desktop, codex and cursor; absent configs are skipped. --dry-run previews without writes or handshake; --yes skips the write prompt. Custom servers use --command, a quoted --args string and repeated --env K=V. Environment entries are stored in client config; prefer the client/server credential mechanism suitable for your setup. Reload affected clients after a real change.
 
-<h2><img src="https://api.iconify.design/tabler:photo.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Demo</h2>
+## Integrations and responsibilities
 
-![demo](assets/demo.gif)
+<picture>
+  <source media="(max-width: 600px) and (prefers-color-scheme: dark)" srcset="./assets/presentation/integrations-mobile-dark.svg">
+  <source media="(max-width: 600px)" srcset="./assets/presentation/integrations-mobile-light.svg">
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/presentation/integrations-dark.svg">
+  <img src="./assets/presentation/integrations-light.svg" width="960" alt="Integrations diagram">
+</picture>
 
-<h2><img src="https://api.iconify.design/tabler:plug-connected.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Supported clients</h2>
+Choose the input and output route that matches your workflow. The local example below exercises the stated subset.
 
-| Client | Config file | Format | Status |
-|---|---|---|---|
-| Claude Code | `~/.claude.json` | JSON (`mcpServers.<name>`, with `type:"stdio"`) | ✓ verified |
-| Claude Desktop | `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) | JSON (`mcpServers`) | ✓ verified |
-| Codex | `~/.codex/config.toml` | TOML (`[mcp_servers.<name>]`) | ✓ verified |
-| Cursor | `~/.cursor/mcp.json` | JSON (`mcpServers`) | fail-soft: skipped if no config |
+| Route | Implemented role |
+| --- | --- |
+| Claude Code / Desktop | mcpServers JSON entries |
+| Cursor | Existing mcp.json adapter |
+| Codex | mcp_servers TOML tables |
+| Stdio JSON-RPC | initialize and tools/list |
+| Local backups | Before changed config writes |
 
-Undetected clients are never guess-written — mcpx only touches clients whose path is confirmed, and prints a clear "skipped" note for the rest.
+## Limits and next steps
 
-<h2><img src="https://api.iconify.design/tabler:git-compare.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Comparison</h2>
+- The demo exercises config files in a temporary directory, not live clients or an MCP handshake.
+- A server handshake does not prove a client loaded the entry or every tool works. Warnings and failures can leave the entry installed; inspect per-client output rather than trusting exit status alone.
+- remove targets the named entry and does not track whether mcpx originally created it. Server commands can download packages or run code during a real add.
 
-Honest positioning — each alternative is better at something:
+More client adapters, doctor checks and shared team profiles remain future work; no hosted Teams backend is included.
 
-| Capability | `mcpx` | `claude mcp add` | [awesome-mcp-servers](https://github.com/punkpeye/awesome-mcp-servers) | Smithery / mcp-get |
-|---|:--:|:--:|:--:|:--:|
-| One command writes into **every** detected client | ✓ | — (Claude Code only) | — (a directory) | partial (single-point / registry) |
-| Handshake smoke-test after install | ✓ | — | — | — |
-| Backup + idempotent merge (leaves your other keys alone) | ✓ | ✓ | n/a | partial |
-| Local, no account, no cloud | ✓ | ✓ | ✓ | partial (cloud / registry-leaning) |
-| Server discovery / catalog size | 8 built-in | — | ✓ **90k★, unmatched** | ✓ |
+## License and contributions
 
-> In one line: catalogs tell you *what exists*, each client's own `add` writes *itself*, and mcpx writes *across clients and proves the server actually connects*.
-
-<h2><img src="https://api.iconify.design/tabler:credit-card.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Pricing</h2>
-
-The local core — detect, backup, cross-client write, handshake — is **open source with no paywall, forever**. Payment sits only at the "team sync / audit" layer:
-
-| Tier | For | Price | What you get |
-|---|---|---|---|
-| **OSS Core** | Individual developers | Open source, free | Everything above this section |
-| **mcpx Teams** | 5–30-person engineering teams | **$5 / seat / month** (team cap from $49/mo, ≤10 seats) | Hosted team manifest (a shared profile of "which servers + versions to install"), `mcpx add --profile <team>` to align the whole team in one command, CI checks that every member's config matches the team profile, audit log |
-
-> Teams is a v0.3+ wedge — v0.1 only stubs the roadmap and ships no Teams code. The local write action never sits behind a paywall.
-
-<h2><img src="https://api.iconify.design/tabler:map-2.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> Roadmap</h2>
-
-- [x] **m1** — `mcpx add`: detect → backup → idempotent write → handshake, per-client OK/WARN/FAIL
-- [x] **m2** — `mcpx list` / `mcpx remove` (re-backup before delete, keep other entries)
-- [x] **m3** — 8-server built-in catalog + `--command/--args/--env` from-spec; cross-platform single binary, bilingual README, demo, CI
-- [ ] More client adapters (implemented once each client's config path is confirmed)
-- [ ] `mcpx doctor`: health-check the MCP servers each client has installed
-- [ ] **mcpx Teams**: shared profile + CI gate + audit (the paid wedge)
-
-<h2><img src="https://api.iconify.design/tabler:license.svg?color=%230071E3&width=24" height="22" align="absmiddle" alt=""> License & contributing</h2>
-
-Apache-2.0. Issues and PRs welcome — please mention which clients you use and which one you'd like supported next.
-
-## Share this
-
-```
-mcpx — the one-command MCP installer that writes into every coding agent you have (Claude Code, Codex, Cursor) and handshake-verifies each. No account, no cloud. https://github.com/SuperMarioYL/mcpx
-```
-
-<p align="center"><sub><a href="./LICENSE">Apache-2.0</a> © 2026 SuperMarioYL</sub></p>
+See [LICENSE](./LICENSE). When reporting an issue, include a minimal input, the command, and the observed output.

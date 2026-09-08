@@ -1,0 +1,13 @@
+{
+  "schema": 1,
+  "source_revision": "f6d782b2140eb3e55dfeeaf9ad206c9f7ad3d7bd",
+  "scope": "Local JSON/TOML merge, repeat and removal using production writers with temporary config paths; no installed client or MCP server is contacted.",
+  "steps": [
+    {
+      "label": "Recorded run",
+      "body": "Local JSON/TOML merge, repeat and removal using production writers with temporary config paths; no installed client or MCP server is contacted.",
+      "command": "go run ./examples/presentation",
+      "output": "claude-code: first_changed=true backup=true repeat_changed=false servers=1\nclaude-code: remove_changed=true\ncodex: first_changed=true backup=true repeat_changed=false servers=1\ncodex: remove_changed=true"
+    }
+  ]
+}

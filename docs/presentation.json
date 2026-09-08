@@ -1,0 +1,82 @@
+{
+  "name": "mcpx",
+  "tagline": "Write one MCP server entry across your clients.",
+  "architecture": {
+    "title": "Inside mcpx",
+    "nodes": [
+      {
+        "title": "ServerSpec / catalog",
+        "detail": "internal/catalog"
+      },
+      {
+        "title": "Client adapters",
+        "detail": "internal/clients"
+      },
+      {
+        "title": "Backup + merge",
+        "detail": "internal/config"
+      },
+      {
+        "title": "Stdio handshake",
+        "detail": "internal/handshake"
+      }
+    ],
+    "edges": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        3
+      ]
+    ]
+  },
+  "process": {
+    "title": "From input to a useful result",
+    "steps": [
+      {
+        "title": "One server spec",
+        "detail": "Demo stdio command"
+      },
+      {
+        "title": "Merge twice",
+        "detail": "Backup then idempotent no-op"
+      },
+      {
+        "title": "Read and remove",
+        "detail": "Temporary files only"
+      }
+    ],
+    "result": "Both adapters write one entry with a backup; the second merge is unchanged, and removal reports a change."
+  },
+  "integrations": {
+    "title": "Supported input and output routes",
+    "items": [
+      {
+        "title": "Claude Code / Desktop",
+        "detail": "mcpServers JSON entries"
+      },
+      {
+        "title": "Cursor",
+        "detail": "Existing mcp.json adapter"
+      },
+      {
+        "title": "Codex",
+        "detail": "mcp_servers TOML tables"
+      },
+      {
+        "title": "Stdio JSON-RPC",
+        "detail": "initialize and tools/list"
+      },
+      {
+        "title": "Local backups",
+        "detail": "Before changed config writes"
+      }
+    ]
+  }
+}

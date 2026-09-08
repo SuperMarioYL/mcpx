@@ -1,7 +1,7 @@
 name: pages
 on:
   push:
-    branches: [main]
+    branches: ["main"]
     paths: ['web/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
@@ -12,35 +12,7 @@ concurrency:
   group: pages
   cancel-in-progress: false
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: web/package-lock.json
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: fonttools for CJK subset (fail-soft)
-        run: pip install fonttools brotli
-      - name: Build self-contained site
-        working-directory: web
-        run: |
-          npm ci
-          npm run build
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
-        with:
-          path: web/dist
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
+  site:
+    uses: SuperMarioYL/web-factory/.github/workflows/build-site.yml@fbff4bd18225c8795d4d473ac1b92b785fbba1fc
+    with:
+      factory_ref: fbff4bd18225c8795d4d473ac1b92b785fbba1fc

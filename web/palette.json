@@ -1,0 +1,38 @@
+{
+  "mode": "auto",
+  "id": "ac56e6-e76ad6-beacf6-b5565d7050b1",
+  "identity": "https://github.com/supermarioyl/mcpx",
+  "primary": "#ac56e6",
+  "secondary": "#e76ad6",
+  "highlight": "#beacf6",
+  "dark": {
+    "bg": "#080712",
+    "panel": "#10101f",
+    "code": "#100d1d",
+    "ink": "#f2eefd",
+    "muted": "#a69cc4",
+    "line": "#2c1841",
+    "primary": "#ac56e6",
+    "secondary": "#e76ad6",
+    "highlight": "#beacf6",
+    "accent": "#ac56e6",
+    "buttonStart": "#a150d7",
+    "buttonEnd": "#b252a5",
+    "buttonText": "#ffffff"
+  },
+  "light": {
+    "bg": "#fcf9fe",
+    "panel": "#fbf7fe",
+    "code": "#f9f3fd",
+    "ink": "#1f1630",
+    "muted": "#665e88",
+    "line": "#e6cbf7",
+    "primary": "#994ccd",
+    "secondary": "#a94e9d",
+    "highlight": "#756a98",
+    "accent": "#994ccd",
+    "buttonStart": "#a150d7",
+    "buttonEnd": "#b252a5",
+    "buttonText": "#ffffff"
+  }
+}

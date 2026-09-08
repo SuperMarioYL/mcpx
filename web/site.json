@@ -150,6 +150,10 @@
           "alt": {
             "en": "Follow the operation",
             "zh": "处理过程"
+          },
+          "mobile": {
+            "light": "/assets/presentation/process-mobile-light.svg",
+            "dark": "/assets/presentation/process-mobile-dark.svg"
           }
         }
       },
@@ -168,6 +172,10 @@
           "alt": {
             "en": "Inside mcpx",
             "zh": "mcpx 的内部流程"
+          },
+          "mobile": {
+            "light": "/assets/presentation/architecture-mobile-light.svg",
+            "dark": "/assets/presentation/architecture-mobile-dark.svg"
           }
         }
       },
@@ -186,6 +194,10 @@
           "alt": {
             "en": "Connect the pieces",
             "zh": "输入与输出"
+          },
+          "mobile": {
+            "light": "/assets/presentation/integrations-mobile-light.svg",
+            "dark": "/assets/presentation/integrations-mobile-dark.svg"
           }
         }
       }
@@ -213,5 +225,17 @@
         "code": "go run ./cmd/mcpx catalog\ngo run ./cmd/mcpx add filesystem --clients claude-code,codex --dry-run\n# Apply to your detected clients after reviewing the preview:\ngo run ./cmd/mcpx add filesystem --clients claude-code,codex\ngo run ./cmd/mcpx list\ngo run ./cmd/mcpx remove filesystem --dry-run"
       }
     ]
-  }
+  },
+  "changelog": [
+    {
+      "version": "v0.5.0",
+      "zh": "把所有版本面对齐：回填了 0.2.0/0.3.0/0.4.0 三个小版本的 CHANGELOG 条目（此前头部仍是 0.1.0，而二进制已是 0.4.0），给 site.json 补上 content_version，并加了一个单一真源锁步测试，断言 VERSION、--version、CHANGELOG 头部、站点 content_version 四处一致。",
+      "en": "Put every version surface back in lockstep: backfilled the missing 0.2.0/0.3.0/0.4.0 CHANGELOG entries (the head still read 0.1.0 while the binary reported 0.4.0), added a content_version to site.json, and added a single-source-of-truth lockstep test asserting VERSION, --version, the CHANGELOG head, and the site content_version all agree."
+    },
+    {
+      "version": "v0.4.0",
+      "zh": "握手冒烟测试现在在独立进程组里启动 server，结束时装组杀掉整个进程树——npx/uvx 拉起的 node/python 子进程不再被孤立成孤儿占用资源。README「实测输出」里的备份文件名已对齐真实格式（.mcpx.bak.<YYYYMMDD-HHMMSS.毫秒>）。",
+      "en": "The handshake smoke test now launches the server in its own process group and tears down the whole tree on exit — the node/python grandchild that npx/uvx spawns is no longer orphaned to leak a runtime process on every handshake. The README \"real output\" backup filename now matches the real format (.mcpx.bak.<YYYYMMDD-HHMMSS.mmm>)."
+    }
+  ]
 }

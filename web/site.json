@@ -11,8 +11,8 @@
   "meta": {
     "visual_style": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "content_version": "v0.5.0",
-    "source_version": "v0.5.0"
+    "content_version": "v0.6.0",
+    "source_version": "v0.6.0"
   },
   "hero": {
     "headline": {
@@ -227,6 +227,11 @@
     ]
   },
   "changelog": [
+    {
+      "version": "v0.6.0",
+      "zh": "三个输入/开销类修复：`mcpx add <目录内server> --args ...` 现在直接报错而不是静默丢弃参数（要自定义参数请走 --command/--args）；`--clients` 里的未知 id 现在会报错并列出有效 id，拼写错误不再悄悄缩小写入范围；同一命令只跑一次握手冒烟测试再镜像到每个客户端的报告行——多客户端安装不再重复下载 npx/uvx 包、超时也不再按客户端数翻倍。",
+      "en": "Three input/cost fixes: `mcpx add <catalog-server> --args ...` now errors instead of silently dropping the args (use --command/--args to install from spec); unknown ids in `--clients` now fail with the valid id list, so a typo can no longer quietly narrow which configs get written; and one handshake smoke test runs per add and is mirrored across each client's report line — multi-client installs no longer re-download npx/uvx packages per client or multiply the timeout by the client count."
+    },
     {
       "version": "v0.5.0",
       "zh": "把所有版本面对齐：回填了 0.2.0/0.3.0/0.4.0 三个小版本的 CHANGELOG 条目（此前头部仍是 0.1.0，而二进制已是 0.4.0），给 site.json 补上 content_version，并加了一个单一真源锁步测试，断言 VERSION、--version、CHANGELOG 头部、站点 content_version 四处一致。",

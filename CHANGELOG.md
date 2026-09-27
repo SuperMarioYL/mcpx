@@ -4,6 +4,22 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-09-28
+
+### Fixed
+
+- **`--args` with a catalog name** — `mcpx add <built-in> --args ...` without
+  `--command` now errors instead of silently dropping the args and installing
+  the default catalog arguments; pass `--command`/`--args` to install from
+  spec. (`--env` on the catalog path stays honored.)
+- **`--clients` validation** — unknown ids (e.g. a typo like `cursorr`) now fail
+  fast with the valid id list instead of silently narrowing which client
+  configs get written or reporting a false "No MCP-capable clients detected".
+- **One handshake per add** — the handshake smoke test is a pure function of the
+  server spec, so it now runs once per `mcpx add` and the verdict is mirrored
+  across each client's report line, instead of spawning the same server once
+  per detected client (N x cold-cache downloads, N x 8s on the timeout path).
+
 ## [0.5.0] - 2026-09-07
 
 ### Fixed

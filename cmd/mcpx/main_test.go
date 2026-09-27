@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -115,5 +117,116 @@ func TestVersionLockstep(t *testing.T) {
 	}
 	if siteVersion != want {
 		t.Errorf("web/site.json meta.content_version = %q, want %q (version var)", site.Meta.ContentVersion, want)
+	}
+}
+
+// TestValidateClientIDs pins the --clients validation added so a typo'd id
+// fails loudly instead of being silently dropped by DetectSubset.
+func TestValidateClientIDs(t *testing.T) {
+	if err := validateClientIDs(nil); err != nil {
+		t.Fatalf("empty subset must pass, got %v", err)
+	}
+	if err := validateClientIDs([]string{"claude-code", "codex"}); err != nil {
+		t.Fatalf("known ids must pass, got %v", err)
+	}
+	err := validateClientIDs([]string{"cursorr"})
+	if err == nil {
+		t.Fatal("unknown id must be rejected")
+	}
+	for _, want := range []string{"cursorr", "claude-code", "cursor"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("error %q should mention %q (the typo and valid ids)", err, want)
+		}
+	}
+}
+
+// TestClientsFlagUnknownIDFailsFast runs the real command chain: the unknown
+// id must produce an error before any detection/write output happens.
+func TestClientsFlagUnknownIDFailsFast(t *testing.T) {
+	var out bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&out)
+	root.SetErr(&out)
+	root.SetArgs([]string{"add", "filesystem", "--clients", "cursorr", "--yes"})
+	if err := root.Execute(); err == nil {
+		t.Fatal("expected an error for an unknown --clients id")
+	}
+	if strings.Contains(out.String(), "Detected") || strings.Contains(out.String(), "backup") {
+		t.Fatalf("command must fail before detection/write, got output:\n%s", out.String())
+	}
+}
+
+// buildStub compiles the handshake testdata stub server once and returns its
+// binary path. It supports MCPX_STUB_COUNT_FILE, which the stub appends a
+// "spawn" line to at startup — used to count how many times the server was
+// actually spawned.
+func buildStub(t *testing.T) string {
+	t.Helper()
+	if _, err := exec.LookPath("go"); err != nil {
+		t.Skip("go toolchain not on PATH; cannot build the stub server")
+	}
+	_, thisFile, _, ok := runtime.Caller(0)
+	if !ok {
+		t.Fatal("runtime.Caller failed to locate the test source")
+	}
+	repoRoot := filepath.Join(filepath.Dir(thisFile), "..", "..")
+	bin := filepath.Join(t.TempDir(), "stubserver")
+	cmd := exec.Command("go", "build", "-o", bin, "./internal/handshake/testdata/stubserver")
+	cmd.Dir = repoRoot
+	if out, err := cmd.CombinedOutput(); err != nil {
+		t.Fatalf("build stub server: %v\n%s", err, out)
+	}
+	return bin
+}
+
+// TestAddRunsHandshakeOnceForAllClients is the regression test for
+// fix-handshake-once-per-add: the handshake is a pure function of the spec, so
+// an add that writes into two clients must spawn the server exactly once.
+func TestAddRunsHandshakeOnceForAllClients(t *testing.T) {
+	stub := buildStub(t)
+	home := t.TempDir()
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
+	t.Setenv("APPDATA", filepath.Join(home, "AppData", "Roaming"))
+	if err := os.MkdirAll(filepath.Join(home, ".cursor"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, name := range []string{".claude.json", filepath.Join(".cursor", "mcp.json")} {
+		if err := os.WriteFile(filepath.Join(home, name), []byte(`{}`), 0o600); err != nil {
+			t.Fatal(err)
+		}
+	}
+	countFile := filepath.Join(t.TempDir(), "spawns")
+
+	var out bytes.Buffer
+	root := newRootCmd()
+	root.SetOut(&out)
+	root.SetErr(&out)
+	root.SetArgs([]string{
+		"add", "probe",
+		"--command", stub,
+		"--env", "MCPX_STUB_COUNT_FILE=" + countFile,
+		"--yes",
+	})
+	if err := root.Execute(); err != nil {
+		t.Fatalf("add failed: %v\n%s", err, out.String())
+	}
+	data, err := os.ReadFile(countFile)
+	if err != nil {
+		t.Fatalf("stub was never spawned (no count file):\n%s", out.String())
+	}
+	if n := strings.Count(string(data), "spawn"); n != 1 {
+		t.Fatalf("handshake spawned the server %d times, want 1\noutput:\n%s", n, out.String())
+	}
+	// The two written clients each report the shared handshake verdict.
+	if got := strings.Count(out.String(), "handshake OK"); got != 2 {
+		t.Fatalf("want 2 per-client handshake lines, got %d\noutput:\n%s", got, out.String())
+	}
+	// Both configs actually received the entry.
+	for _, name := range []string{".claude.json", filepath.Join(".cursor", "mcp.json")} {
+		b, err := os.ReadFile(filepath.Join(home, name))
+		if err != nil || !strings.Contains(string(b), `"probe"`) {
+			t.Errorf("%s missing the written entry: %v %s", name, err, b)
+		}
 	}
 }

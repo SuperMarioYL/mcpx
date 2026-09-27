@@ -5,6 +5,9 @@
 //	error           — answers initialize, then returns a JSON-RPC error to tools/list
 //	silent          — reads requests but never replies (drives the timeout/WARN path)
 //	crash           — exits immediately without replying
+//
+// When MCPX_STUB_COUNT_FILE is set, the stub appends one "spawn" line to that
+// file at startup, so tests can count how many times the server was spawned.
 package main
 
 import (
@@ -24,6 +27,12 @@ func main() {
 	mode := os.Getenv("MCPX_STUB_MODE")
 	if mode == "crash" {
 		os.Exit(1)
+	}
+	if cf := os.Getenv("MCPX_STUB_COUNT_FILE"); cf != "" {
+		if f, err := os.OpenFile(cf, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644); err == nil {
+			fmt.Fprintln(f, "spawn")
+			f.Close()
+		}
 	}
 
 	in := bufio.NewReader(os.Stdin)

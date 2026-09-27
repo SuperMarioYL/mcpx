@@ -20,7 +20,7 @@ import (
 )
 
 // version is stamped at build time via -ldflags; defaults to the VERSION file value.
-var version = "0.5.0"
+var version = "0.6.0"
 
 // global flags
 var (
@@ -60,6 +60,13 @@ func newRootCmd() *cobra.Command {
 		"restrict to a subset of clients (comma-separated ids: "+strings.Join(clients.IDs(), ",")+")")
 	root.PersistentFlags().BoolVar(&flagDryRun, "dry-run", false, "show what would change, write nothing")
 	root.PersistentFlags().BoolVarP(&flagYes, "yes", "y", false, "skip confirmation prompt")
+	// --clients gates which configs get written, so a typo'd id must fail loudly
+	// instead of being silently dropped by DetectSubset (which would narrow the
+	// write set, or report "No MCP-capable clients detected" on a machine that
+	// has clients installed).
+	root.PersistentPreRunE = func(cmd *cobra.Command, _ []string) error {
+		return validateClientIDs(flagClients)
+	}
 
 	root.AddCommand(newAddCmd(), newListCmd(), newRemoveCmd(), newCatalogCmd())
 	return root
@@ -120,6 +127,13 @@ func runAdd(cmd *cobra.Command, spec clients.ServerSpec) error {
 	}
 
 	ok, fail := 0, 0
+	// The handshake is a pure function of the spec (it never reads any client
+	// config), so its verdict is identical for every client. Run it once, lazily
+	// on the first successful write, and mirror the verdict across the per-client
+	// report lines — spawning the same server once per client cost N x downloads
+	// on a cold npx/uvx cache and N x timeout on a wedged server.
+	var hs handshake.Result
+	hsDone := false
 	for _, dc := range present {
 		res, err := config.Merge(dc.Adapter, spec, flagDryRun)
 		if err != nil {
@@ -141,11 +155,15 @@ func runAdd(cmd *cobra.Command, spec clients.ServerSpec) error {
 			fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s\n", "", cDim("backup: "+res.BackupPath))
 		}
 
-		// Handshake (skipped in dry-run — nothing was written to test against).
+		// Handshake (skipped in dry-run — nothing was written to test against,
+		// and never spawned when every write failed).
 		if flagDryRun {
 			continue
 		}
-		hs := handshake.Test(spec)
+		if !hsDone {
+			hs = handshake.Test(spec)
+			hsDone = true
+		}
 		switch hs.Status {
 		case handshake.StatusOK:
 			fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s %s\n", "",
@@ -285,6 +303,31 @@ func newCatalogCmd() *cobra.Command {
 			return nil
 		},
 	}
+}
+
+// validateClientIDs rejects unknown --clients values with the valid id list.
+// DetectSubset ignores unknown ids by design (library-level tolerance); the CLI
+// layer validates so a typo narrows nothing silently.
+func validateClientIDs(ids []string) error {
+	if len(ids) == 0 {
+		return nil
+	}
+	valid := clients.IDs()
+	known := make(map[string]bool, len(valid))
+	for _, id := range valid {
+		known[id] = true
+	}
+	var unknown []string
+	for _, id := range ids {
+		if !known[id] {
+			unknown = append(unknown, id)
+		}
+	}
+	if len(unknown) == 0 {
+		return nil
+	}
+	return fmt.Errorf("unknown --clients %s; valid ids: %s",
+		strings.Join(unknown, ", "), strings.Join(valid, ", "))
 }
 
 // ---- helpers --------------------------------------------------------------

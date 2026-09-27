@@ -105,6 +105,16 @@ func Resolve(name, command string, args []string, env map[string]string) (client
 			"unknown server %q: pass --command/--args to install it from spec, or choose a built-in (%s)",
 			name, strings.Join(Names(), ", "))
 	}
+	// --args only feeds the from-spec path. On the catalog path it used to be
+	// dropped silently, so `mcpx add filesystem --args "... /tmp"` ran with the
+	// default catalog args and wrote a config that did not do what the user
+	// asked. Fail loudly instead (mirrors the unknown-server error style); --env
+	// stays honored on the catalog path.
+	if len(args) > 0 {
+		return clients.ServerSpec{}, fmt.Errorf(
+			"--args only applies together with --command; %q is a built-in catalog server with predefined args (%s). To install it from spec, pass --command %s --args '<args>'",
+			name, strings.Join(e.Args, " "), e.Command)
+	}
 	spec := clients.ServerSpec{
 		Name:    e.Name,
 		Command: e.Command,

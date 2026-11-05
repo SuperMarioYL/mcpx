@@ -4,6 +4,36 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-11-06
+
+### Fixed
+
+- **`add` exit status** — a client that could not be written, or whose server
+  could not be reached, now makes `mcpx add` exit non-zero (`error: N of M
+  client(s) failed`) instead of printing `! 0/1 clients ready` and exiting 0. A
+  handshake WARN still exits 0: the entry is kept and only the smoke test timed
+  out. Dry-run, a declined prompt and "no clients detected" also stay 0.
+- **`remove` failure reporting** — a config that could not be read or written was
+  dropped from the count, so the command printed a green "removed from 0
+  client(s)" while every client had failed. Failures are now counted, the summary
+  reads "removed from N client(s), M failed", and the process exits non-zero. A
+  blank server name (`mcpx remove ""`) is rejected before detection instead of
+  reporting success for work that could never happen.
+- **Codex TOML rewrite is no longer silent about comments** — `add`/`remove`
+  re-serialize `~/.codex/config.toml` in canonical form (go-toml/v2 has no
+  comment-preserving editor), which drops comments and formatting. mcpx now
+  prints a note when the file carried comments, pointing at the backup, instead
+  of losing them silently; the "surgical merge" wording in the docs is corrected.
+- **Symlinked configs are written through, not replaced** — when a client config
+  is a symlink (a dotfile-managed `~/.claude.json`, for example), the atomic
+  rename used to replace the link with a regular file and leave the managed
+  target stale. The write now resolves the link and updates its target, so the
+  link survives.
+- **Version-surface guard** — the lockstep test now also checks web/site.json
+  `meta.source_version` and asserts that every CHANGELOG version heading has a
+  matching release link (the 0.6.0 heading had none). The MCP `clientInfo`
+  version derives from `internal/version`, the single authoritative literal.
+
 ## [0.6.0] - 2026-09-28
 
 ### Fixed
@@ -99,6 +129,8 @@ client on the machine — no account, no cloud.
 - Cross-platform single binary, GitHub Actions CI (gofmt + vet + test + build
   matrix), goreleaser release workflow, and a vhs demo tape.
 
+[0.7.0]: https://github.com/SuperMarioYL/mcpx/releases/tag/v0.7.0
+[0.6.0]: https://github.com/SuperMarioYL/mcpx/releases/tag/v0.6.0
 [0.5.0]: https://github.com/SuperMarioYL/mcpx/releases/tag/v0.5.0
 [0.4.0]: https://github.com/SuperMarioYL/mcpx/releases/tag/v0.4.0
 [0.3.0]: https://github.com/SuperMarioYL/mcpx/releases/tag/v0.3.0

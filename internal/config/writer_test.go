@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"testing"
@@ -396,5 +397,95 @@ func TestDryRunWritesNothing(t *testing.T) {
 	}
 	if bs := backupsFor(t, path); len(bs) != 0 {
 		t.Errorf("dry-run must not create backups, found %d", len(bs))
+	}
+}
+
+// TestMergeTOML_ReportsDroppedComments is the regression test for
+// fix-codex-toml-rewrite-silent-comment-loss: the TOML path re-serializes the
+// whole document (go-toml/v2 has no comment-preserving editor), so a rewrite of a
+// comment-bearing file must be reported instead of silently losing the comments.
+func TestMergeTOML_ReportsDroppedComments(t *testing.T) {
+	setHome(t)
+	c, _ := clients.ByID("codex")
+	path := mustPath(t, c)
+	writeFixture(t, path, "# my notes\nmodel = \"gpt-5\"\n\n[features]\nweb_search = true\n")
+
+	res, err := Merge(c, fsSpec, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.CommentsLost {
+		t.Error("a comment-bearing TOML rewrite must set CommentsLost")
+	}
+	data, _ := os.ReadFile(path)
+	if strings.Contains(string(data), "# my notes") {
+		t.Fatal("fixture invalid: re-serialization should have dropped the comment")
+	}
+	// Values, not just the comment, must survive the rewrite.
+	var root map[string]any
+	if err := toml.Unmarshal(data, &root); err != nil {
+		t.Fatalf("rewritten file is not valid TOML: %v", err)
+	}
+	if root["model"] != "gpt-5" {
+		t.Errorf("unrelated top-level value lost: %#v", root["model"])
+	}
+	if _, ok := root["features"]; !ok {
+		t.Error("unrelated [features] table lost")
+	}
+
+	// A comment-free file rewrites silently.
+	writeFixture(t, path, "model = \"gpt-5\"\n")
+	res2, err := Merge(c, fsSpec, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res2.CommentsLost {
+		t.Error("a comment-free TOML rewrite must not report dropped comments")
+	}
+}
+
+// TestMergeWritesThroughSymlinkedConfig is the regression test for
+// fix-symlinked-config-clobber: a dotfile-managed config is a symlink, and the
+// atomic rename used to replace the link with a regular file, leaving the
+// managed target stale.
+func TestMergeWritesThroughSymlinkedConfig(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("creating symlinks needs elevation on Windows")
+	}
+	setHome(t)
+	c, _ := clients.ByID("claude-code")
+	path := mustPath(t, c)
+
+	target := filepath.Join(t.TempDir(), "managed-claude.json")
+	if err := os.WriteFile(target, []byte(`{"mcpServers":{}}`), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.Symlink(target, path); err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := Merge(c, fsSpec, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.Changed {
+		t.Fatal("merge into a symlinked config should change it")
+	}
+	fi, err := os.Lstat(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if fi.Mode()&os.ModeSymlink == 0 {
+		t.Fatalf("config symlink was replaced by a regular file (mode %v)", fi.Mode())
+	}
+	data, err := os.ReadFile(target)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := gjson.GetBytes(data, "mcpServers.filesystem.command").String(); got != "npx" {
+		t.Errorf("symlink target did not receive the entry, got command %q in %s", got, data)
 	}
 }

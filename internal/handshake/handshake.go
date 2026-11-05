@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/SuperMarioYL/mcpx/internal/clients"
+	"github.com/SuperMarioYL/mcpx/internal/version"
 )
 
 // DefaultTimeout bounds the whole handshake so a wedged server never hangs the CLI.
@@ -156,7 +157,7 @@ func run(ctx context.Context, stdin io.Writer, frames <-chan frame) (Result, err
 	initParams := map[string]any{
 		"protocolVersion": "2025-06-18",
 		"capabilities":    map[string]any{},
-		"clientInfo":      map[string]any{"name": "mcpx", "version": "0.6.0"},
+		"clientInfo":      map[string]any{"name": "mcpx", "version": version.Version},
 	}
 	if err := writeRequest(stdin, jsonrpcRequest{JSONRPC: "2.0", ID: 1, Method: "initialize", Params: initParams}); err != nil {
 		return Result{}, fmt.Errorf("send initialize: %w", err)

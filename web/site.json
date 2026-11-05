@@ -11,8 +11,8 @@
   "meta": {
     "visual_style": "neon-particle",
     "demo_source": "docs/demo-results.json",
-    "content_version": "v0.6.0",
-    "source_version": "v0.6.0"
+    "content_version": "v0.7.0",
+    "source_version": "v0.7.0"
   },
   "hero": {
     "headline": {
@@ -110,8 +110,12 @@
       "zh": "示例操作临时目录配置，不验证在线客户端或 MCP 握手。"
     },
     {
-      "en": "A server handshake does not prove a client loaded the entry or every tool works. Warnings and failures can leave the entry installed; inspect per-client output rather than trusting exit status alone.",
-      "zh": "服务握手不证明客户端已加载配置或所有工具可用。警告与失败可能保留已写条目；应检查逐客户端输出，不能只依赖退出码。"
+      "en": "A server handshake does not prove a client loaded the entry or every tool works. A write or handshake FAIL exits non-zero and names the failing client, but the entry may already be written; a handshake WARN (timeout) keeps the entry and still exits 0. Inspect the per-client lines when either happens.",
+      "zh": "服务握手不证明客户端已加载配置或所有工具可用。写入或握手 FAIL 会以非零状态退出并指出失败客户端，但条目可能已写入；握手 WARN（超时）保留条目且仍以 0 退出。出现这两种情况时应查看逐客户端输出。"
+    },
+    {
+      "en": "Writing a Codex TOML config re-serializes the whole file in canonical form, so comments and formatting are not preserved. A sibling backup is written first, and add/remove print a note when the file carried comments.",
+      "zh": "写入 Codex 的 TOML 配置会以规范形式重写整个文件，注释与格式不会保留。写入前会在同目录生成备份；若原文件含注释，add/remove 会打印提示。"
     },
     {
       "en": "remove targets the named entry and does not track whether mcpx originally created it. Server commands can download packages or run code during a real add.",
@@ -227,6 +231,11 @@
     ]
   },
   "changelog": [
+    {
+      "version": "v0.7.0",
+      "zh": "五个正确性修复：`mcpx add` / `mcpx remove` 在客户端写入或握手 FAIL 时会以非零状态退出并报告失败客户端（不再出现全红却返回成功），握手 WARN 仍按 fail-soft 返回 0；Codex TOML 配置被重写时会明确提示注释与格式不保留并指向备份；符号链接的客户端配置现在写入链接目标而不是把链接替换成普通文件；版本锁步测试补上站点 source_version、CHANGELOG 发布链接与握手 clientInfo 版本。",
+      "en": "Five correctness fixes: `mcpx add` / `mcpx remove` now exit non-zero and report the failing clients when a write or handshake FAILs (no more all-red runs that report success), while a handshake WARN keeps the documented fail-soft exit 0; a Codex TOML rewrite now says plainly that comments and formatting are not preserved and points at the backup; a symlinked client config is written through the link instead of being replaced by a regular file; and the version lockstep test now also covers the site source_version, CHANGELOG release links and the handshake clientInfo version."
+    },
     {
       "version": "v0.6.0",
       "zh": "三个输入/开销类修复：`mcpx add <目录内server> --args ...` 现在直接报错而不是静默丢弃参数（要自定义参数请走 --command/--args）；`--clients` 里的未知 id 现在会报错并列出有效 id，拼写错误不再悄悄缩小写入范围；同一命令只跑一次握手冒烟测试再镜像到每个客户端的报告行——多客户端安装不再重复下载 npx/uvx 包、超时也不再按客户端数翻倍。",

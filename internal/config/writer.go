@@ -1,7 +1,9 @@
 // Package config performs backup-before-write, idempotent merge, listing, and
 // removal of a single MCP server entry inside a client config file — without
-// clobbering unrelated keys. JSON clients use sjson/gjson (key-path merge);
-// the Codex TOML client uses go-toml/v2 for a surgical table merge.
+// clobbering unrelated keys. JSON clients use sjson/gjson (byte-surgical
+// key-path merge). The Codex TOML client parses the whole document and
+// re-serializes it with go-toml/v2: every value survives, but comments and
+// formatting do not, which is reported through Result.CommentsLost.
 package config
 
 import (
@@ -40,6 +42,11 @@ type Result struct {
 	BackupPath string // backup created before mutation ("" if none / dry-run)
 	Changed    bool   // true if the file content actually changed
 	Created    bool   // true if the config file was created fresh
+	// CommentsLost is true when a TOML client's file was rewritten and the
+	// original carried comments. go-toml/v2 has no comment-preserving editor, so
+	// the rewrite re-serializes the whole document and those comments are gone;
+	// callers surface this instead of letting the loss happen silently.
+	CommentsLost bool
 }
 
 // timestamp used for backup suffixes; overridable in tests.
@@ -333,25 +340,27 @@ type tomlEntry struct {
 	Env     map[string]string `toml:"env,omitempty"`
 }
 
-func readTOML(path string) (map[string]any, bool, error) {
+// readTOML loads a Codex-style TOML config. The raw bytes are returned too so a
+// rewrite can tell whether the file carried comments it cannot preserve.
+func readTOML(path string) (map[string]any, []byte, bool, error) {
 	data, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		return map[string]any{}, false, nil
+		return map[string]any{}, nil, false, nil
 	}
 	if err != nil {
-		return nil, false, fmt.Errorf("read %s: %w", path, err)
+		return nil, nil, false, fmt.Errorf("read %s: %w", path, err)
 	}
 	root := map[string]any{}
 	if len(data) > 0 {
 		if err := toml.Unmarshal(data, &root); err != nil {
-			return nil, true, fmt.Errorf("%s is not valid TOML: %w", path, err)
+			return nil, data, true, fmt.Errorf("%s is not valid TOML: %w", path, err)
 		}
 	}
-	return root, true, nil
+	return root, data, true, nil
 }
 
 func mergeTOML(c clients.Client, path string, spec clients.ServerSpec, dryRun bool) (Result, error) {
-	root, existed, err := readTOML(path)
+	root, original, existed, err := readTOML(path)
 	if err != nil {
 		return Result{}, err
 	}
@@ -381,7 +390,7 @@ func mergeTOML(c clients.Client, path string, spec clients.ServerSpec, dryRun bo
 	if err != nil {
 		return Result{}, fmt.Errorf("marshal TOML for %s: %w", path, err)
 	}
-	res := Result{ConfigPath: path, Changed: true, Created: !existed}
+	res := Result{ConfigPath: path, Changed: true, Created: !existed, CommentsLost: hasTOMLComment(original)}
 	if dryRun {
 		return res, nil
 	}
@@ -397,7 +406,7 @@ func mergeTOML(c clients.Client, path string, spec clients.ServerSpec, dryRun bo
 }
 
 func removeTOML(path, name string, dryRun bool) (Result, error) {
-	root, existed, err := readTOML(path)
+	root, original, existed, err := readTOML(path)
 	if err != nil {
 		return Result{}, err
 	}
@@ -421,7 +430,7 @@ func removeTOML(path, name string, dryRun bool) (Result, error) {
 	if err != nil {
 		return Result{}, fmt.Errorf("marshal TOML for %s: %w", path, err)
 	}
-	res := Result{ConfigPath: path, Changed: true}
+	res := Result{ConfigPath: path, Changed: true, CommentsLost: hasTOMLComment(original)}
 	if dryRun {
 		return res, nil
 	}
@@ -437,7 +446,7 @@ func removeTOML(path, name string, dryRun bool) (Result, error) {
 }
 
 func listTOML(path string) ([]ServerInfo, error) {
-	root, existed, err := readTOML(path)
+	root, _, existed, err := readTOML(path)
 	if err != nil {
 		return nil, err
 	}
@@ -507,9 +516,50 @@ func resolvePerm(path string) os.FileMode {
 	return 0o600
 }
 
+// hasTOMLComment reports whether data contains a comment marker: a '#' that is
+// not inside a quoted string. It exists so a rewrite can tell the user that the
+// comments it cannot preserve are about to be dropped. Multi-line strings are
+// not modeled (they can only cause a conservative false positive here).
+func hasTOMLComment(data []byte) bool {
+	var quote byte
+	for i := 0; i < len(data); i++ {
+		c := data[i]
+		switch {
+		case quote != 0:
+			if c == '\\' && quote == '"' {
+				i++ // skip the escaped byte
+				continue
+			}
+			if c == quote {
+				quote = 0
+			}
+		case c == '"' || c == '\'':
+			quote = c
+		case c == '#':
+			return true
+		}
+	}
+	return false
+}
+
+// writeTarget resolves a config path's final symlink so a dotfile-managed layout
+// (e.g. ~/.claude.json -> ~/dotfiles/claude.json) is written THROUGH the link.
+// Renaming a temp file over the link path would replace the link with a regular
+// file and leave the managed target stale. Paths that do not exist yet (a config
+// about to be created) are used as given.
+func writeTarget(path string) string {
+	if real, err := filepath.EvalSymlinks(path); err == nil {
+		return real
+	}
+	return path
+}
+
 // writeFileAtomic writes data to a temp file in the same dir then renames it
-// over path, so a crash mid-write never leaves a truncated config.
+// over path, so a crash mid-write never leaves a truncated config. A symlinked
+// path is resolved first so the rename updates the link's target instead of
+// replacing the link itself.
 func writeFileAtomic(path string, data []byte, perm os.FileMode) error {
+	path = writeTarget(path)
 	dir := filepath.Dir(path)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return fmt.Errorf("mkdir %s: %w", dir, err)

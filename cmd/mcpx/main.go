@@ -17,10 +17,13 @@ import (
 	"github.com/SuperMarioYL/mcpx/internal/clients"
 	"github.com/SuperMarioYL/mcpx/internal/config"
 	"github.com/SuperMarioYL/mcpx/internal/handshake"
+	mcpxver "github.com/SuperMarioYL/mcpx/internal/version"
 )
 
-// version is stamped at build time via -ldflags; defaults to the VERSION file value.
-var version = "0.6.0"
+// version is stamped at build time via -ldflags; it defaults to the single
+// authoritative product version (internal/version), which VERSION, the
+// CHANGELOG head and web/site.json must agree with.
+var version = mcpxver.Version
 
 // global flags
 var (
@@ -154,6 +157,10 @@ func runAdd(cmd *cobra.Command, spec clients.ServerSpec) error {
 		if res.BackupPath != "" {
 			fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s\n", "", cDim("backup: "+res.BackupPath))
 		}
+		if res.CommentsLost {
+			fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s\n", "",
+				cDim("note: config rewritten in canonical form — comments are not preserved (see backup)"))
+		}
 
 		// Handshake (skipped in dry-run — nothing was written to test against,
 		// and never spawned when every write failed).
@@ -192,6 +199,13 @@ func runAdd(cmd *cobra.Command, spec clients.ServerSpec) error {
 		fmt.Fprintf(cmd.OutOrStdout(), "\n%s %s\n", cYellow("!"), cYellow(summary))
 	}
 	fmt.Fprintln(cmd.OutOrStdout(), cDim("Restart (or reload) the affected clients to pick up the new server."))
+	// A client that could not be written, or whose server could not be reached,
+	// is a failure the caller must be able to detect: the exit status is the only
+	// signal a script or CI step has. WARN is not a failure (fail-soft: the entry
+	// is kept and only the smoke test timed out).
+	if fail > 0 {
+		return fmt.Errorf("%d of %d client(s) failed", fail, total)
+	}
 	return nil
 }
 
@@ -242,6 +256,11 @@ func newRemoveCmd() *cobra.Command {
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, cargs []string) error {
 			name := cargs[0]
+			// An empty name can never match an entry; accepting it used to print a
+			// green success line for work that was never possible.
+			if strings.TrimSpace(name) == "" {
+				return fmt.Errorf("server name is required")
+			}
 			detected := clients.DetectSubset(flagClients)
 			present := clients.Present(detected)
 			printDetection(cmd, detected)
@@ -253,12 +272,13 @@ func newRemoveCmd() *cobra.Command {
 				fmt.Fprintln(cmd.OutOrStdout(), "Aborted.")
 				return nil
 			}
-			removed := 0
+			removed, failed := 0, 0
 			fmt.Fprintf(cmd.OutOrStdout(), "\nRemoving %s%s\n", cBold(name), dryRunTag())
 			for _, dc := range present {
 				res, err := config.Remove(dc.Adapter, name, flagDryRun)
 				if err != nil {
 					fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s %v\n", dc.Adapter.DisplayName(), cRed("FAIL"), err)
+					failed++
 					continue
 				}
 				switch {
@@ -272,14 +292,25 @@ func newRemoveCmd() *cobra.Command {
 					if res.BackupPath != "" {
 						fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s\n", "", cDim("backup: "+res.BackupPath))
 					}
+					if res.CommentsLost {
+						fmt.Fprintf(cmd.OutOrStdout(), "  %-16s %s\n", "",
+							cDim("note: config rewritten in canonical form — comments are not preserved (see backup)"))
+					}
 					removed++
 				}
 			}
 			if flagDryRun {
 				fmt.Fprintln(cmd.OutOrStdout(), "\n"+cDim("dry-run: no files were written."))
-			} else {
-				fmt.Fprintf(cmd.OutOrStdout(), "\n%s removed from %d client(s)\n", cGreen("✓"), removed)
+				return nil
 			}
+			// A client that could not be read or written must make the summary say
+			// so and the process exit non-zero, instead of a green "removed from 0".
+			if failed > 0 {
+				fmt.Fprintf(cmd.OutOrStdout(), "\n%s removed from %d client(s), %d failed\n",
+					cYellow("!"), removed, failed)
+				return fmt.Errorf("%d of %d client(s) failed", failed, removed+failed)
+			}
+			fmt.Fprintf(cmd.OutOrStdout(), "\n%s removed from %d client(s)\n", cGreen("✓"), removed)
 			return nil
 		},
 	}

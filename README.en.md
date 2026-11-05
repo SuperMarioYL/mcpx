@@ -118,7 +118,8 @@ Choose the input and output route that matches your workflow. The local example 
 ## Limits and next steps
 
 - The demo exercises config files in a temporary directory, not live clients or an MCP handshake.
-- A server handshake does not prove a client loaded the entry or every tool works. Warnings and failures can leave the entry installed; inspect per-client output rather than trusting exit status alone.
+- A server handshake does not prove a client loaded the entry or every tool works. A write or handshake FAIL exits non-zero and names the client that failed, but the entry may already be written; a handshake WARN (timeout) keeps the entry and still exits 0. Inspect the per-client lines when either happens.
+- Writing a Codex TOML config re-serializes the whole file in canonical form, so comments and formatting are not preserved. A sibling backup is written first, and add/remove print a note when the file carried comments.
 - remove targets the named entry and does not track whether mcpx originally created it. Server commands can download packages or run code during a real add.
 
 More client adapters, doctor checks and shared team profiles remain future work; no hosted Teams backend is included.
